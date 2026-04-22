@@ -1,3 +1,4 @@
+\
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -24,11 +25,35 @@ type TrackingParams = {
 type RouteItem = {
   id: string;
   title: string;
-  label?: string;
-  subtitle?: string;
   href: string;
-  icon: string;
-  featured?: boolean;
+  subtitle?: string;
+  badge?: string;
+};
+
+type PromoSlide = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  copy: string;
+  cta: string;
+  routeId: string;
+  image: string;
+};
+
+type MediaItem = {
+  title: string;
+  sub: string;
+  routeId: string;
+  image: string;
+};
+
+const ASSETS = {
+  appIcon: "/icons/icon-192.png",
+  topLogo: "/assets/toshi-logo-horizontal.png",
+  mascot: "/assets/toshi-mascot.png",
+  casinoBanner: "/assets/casino.png",
+  sportsBanner: "/assets/sports.png",
+  vipBanner: "/assets/toshi-mascot.png",
 };
 
 const TRACKING_KEYS = [
@@ -48,8 +73,57 @@ const TRACKING_KEYS = [
 const STORAGE_KEYS = {
   tracking: "toshi_pwa_tracking",
   recent: "toshi_pwa_recent_destination",
-  installDismissed: "toshi_pwa_install_dismissed",
+  installDismissed: "toshi_pwa_install_dismissed_v3",
 };
+
+const ROUTES: RouteItem[] = [
+  { id: "casino", title: "Casino", href: "https://toshi.bet", subtitle: "Slots, live, originals", badge: "Top" },
+  { id: "sports", title: "Sports", href: "https://toshi.bet/sports/home", subtitle: "Live, props, parlays", badge: "Live" },
+  { id: "rewards", title: "Rewards", href: "https://toshi.bet/rewards", subtitle: "Bonuses & loyalty", badge: "Boost" },
+  { id: "vip", title: "VIP", href: "https://toshi.bet/vip", subtitle: "Perks & status", badge: "Elite" },
+  { id: "lms", title: "LMS", href: "https://toshi.bet/last-man-standing", subtitle: "Free-to-play", badge: "Free" },
+  { id: "affiliate", title: "Affiliate", href: "https://toshi.bet/affiliate", subtitle: "Partner hub", badge: "Earn" },
+  { id: "deposit", title: "Deposit", href: "https://toshi.bet", subtitle: "Fast crypto entry", badge: "Fast" },
+  { id: "support", title: "Support", href: "https://toshi.bet", subtitle: "Help center", badge: "24/7" },
+];
+
+const PROMO_SLIDES: PromoSlide[] = [
+  {
+    id: "casino",
+    eyebrow: "Play now",
+    title: "Casino",
+    copy: "Open straight into slots, live casino, and originals.",
+    cta: "Enter Casino",
+    routeId: "casino",
+    image: ASSETS.casinoBanner,
+  },
+  {
+    id: "sports",
+    eyebrow: "Live betting",
+    title: "Sports",
+    copy: "Fast entry into fixtures, markets, and live action.",
+    cta: "Bet Now",
+    routeId: "sports",
+    image: ASSETS.sportsBanner,
+  },
+  {
+    id: "vip",
+    eyebrow: "Rewards",
+    title: "VIP & Bonuses",
+    copy: "Keep return visits high with faster access to rewards and perks.",
+    cta: "View VIP",
+    routeId: "vip",
+    image: ASSETS.vipBanner,
+  },
+];
+
+const POPULAR_ITEMS: MediaItem[] = [
+  { title: "Casino", sub: "Most played", routeId: "casino", image: ASSETS.casinoBanner },
+  { title: "Sports", sub: "Live now", routeId: "sports", image: ASSETS.sportsBanner },
+  { title: "VIP", sub: "Rewards", routeId: "vip", image: ASSETS.vipBanner },
+  { title: "Rewards", sub: "Bonus flow", routeId: "rewards", image: ASSETS.casinoBanner },
+  { title: "LMS", sub: "Free entry", routeId: "lms", image: ASSETS.sportsBanner },
+];
 
 function isIOS() {
   if (typeof window === "undefined") return false;
@@ -120,6 +194,130 @@ function readRecentDestination() {
   return window.localStorage.getItem(STORAGE_KEYS.recent) || "casino";
 }
 
+function getRoute(id: string) {
+  return ROUTES.find((route) => route.id === id) || ROUTES[0];
+}
+
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function SlotsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="5" y="3" width="12" height="18" rx="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M10 7h4M8.5 11h1M12 11h1M15.5 11h1M8.5 14.5h8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M17 8.5h1.8a1.2 1.2 0 0 1 0 2.4H17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SportsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 3.5 8.4 7l1.2 4.2h4.8L15.6 7 12 3.5ZM9.6 11.2 6 13.8l1.4 4.4h4.6M14.4 11.2 18 13.8l-1.4 4.4H12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function GiftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="10" width="16" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 10v10M4 13h16M7.5 10a2.5 2.5 0 1 1 0-5c2 0 4.5 3.3 4.5 5M16.5 10a2.5 2.5 0 1 0 0-5c-2 0-4.5 3.3-4.5 5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CrownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m4 18 1.5-9 4.5 4 2-5 2 5 4.5-4L20 18Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M4 18h16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function TrophyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M8 4h8v3a4 4 0 0 1-4 4 4 4 0 0 1-4-4V4Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M8 5H5.5A1.5 1.5 0 0 0 4 6.5V7a4 4 0 0 0 4 4M16 5h2.5A1.5 1.5 0 0 1 20 6.5V7a4 4 0 0 1-4 4M12 11v4M9 20h6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function DiamondIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 5h10l4 5-9 9-9-9 4-5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M9.5 5 12 10l2.5-5M3 10h18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function WalletIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M4 8h12.5A2.5 2.5 0 0 0 19 5.5V5M15.5 13h.01" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function SupportIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 13v-1a6 6 0 0 1 12 0v1M6 13a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1v-5H6ZM18 13h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1v-5ZM9 19a3 3 0 0 0 3 2h1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="m16 16 4 4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function getIcon(id: string) {
+  switch (id) {
+    case "casino":
+      return <SlotsIcon />;
+    case "sports":
+      return <SportsIcon />;
+    case "rewards":
+      return <GiftIcon />;
+    case "vip":
+      return <CrownIcon />;
+    case "lms":
+      return <TrophyIcon />;
+    case "affiliate":
+      return <DiamondIcon />;
+    case "deposit":
+      return <WalletIcon />;
+    case "support":
+      return <SupportIcon />;
+    default:
+      return <HomeIcon />;
+  }
+}
+
 export default function Home() {
   const [deferredPrompt, setDeferredPrompt] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
@@ -128,89 +326,14 @@ export default function Home() {
   const [tracking, setTracking] = useState<TrackingParams>({});
   const [recentId, setRecentId] = useState("casino");
   const [installDismissed, setInstallDismissed] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
+  const [activePromo, setActivePromo] = useState(0);
+  const [activeHomeTab, setActiveHomeTab] = useState("top");
+  const [activeNav, setActiveNav] = useState("home");
 
-  const coreRoutes = useMemo<RouteItem[]>(
-    () => [
-      {
-        id: "casino",
-        title: "Casino",
-        label: "HOT",
-        subtitle: "Slots · Live · Originals",
-        href: "https://toshi.bet",
-        icon: "🎰",
-        featured: true,
-      },
-      {
-        id: "sports",
-        title: "Sports",
-        label: "LIVE",
-        subtitle: "Matches · Props · Parlays",
-        href: "https://toshi.bet/sports/home",
-        icon: "⚽",
-        featured: true,
-      },
-      {
-        id: "rewards",
-        title: "Rewards",
-        label: "BOOST",
-        subtitle: "Bonus · Rakeback · Reloads",
-        href: "https://toshi.bet/rewards",
-        icon: "🎁",
-      },
-      {
-        id: "vip",
-        title: "VIP",
-        label: "ELITE",
-        subtitle: "Levels · Perks · Status",
-        href: "https://toshi.bet/vip",
-        icon: "💎",
-      },
-    ],
-    []
-  );
-
-  const utilityRoutes = useMemo<RouteItem[]>(
-    () => [
-      {
-        id: "lms",
-        title: "Last Man Standing",
-        label: "FREE",
-        subtitle: "Tournament",
-        href: "https://toshi.bet/last-man-standing",
-        icon: "🏆",
-      },
-      {
-        id: "deposit",
-        title: "Deposit",
-        label: "FAST",
-        subtitle: "Crypto",
-        href: "https://toshi.bet/deposit",
-        icon: "⬇️",
-      },
-      {
-        id: "affiliate",
-        title: "Affiliate",
-        label: "REV",
-        subtitle: "Partner",
-        href: "https://toshi.bet/affiliate",
-        icon: "🤝",
-      },
-      {
-        id: "support",
-        title: "Support",
-        label: "24/7",
-        subtitle: "Help",
-        href: "https://toshi.bet/help",
-        icon: "🛟",
-      },
-    ],
-    []
-  );
-
-  const continueRoute = useMemo(() => {
-    return [...coreRoutes, ...utilityRoutes].find((route) => route.id === recentId) || coreRoutes[0];
-  }, [coreRoutes, utilityRoutes, recentId]);
+  const topRoutes = useMemo(() => ROUTES.slice(0, 4), []);
+  const actionRoutes = useMemo(() => ROUTES.slice(4), []);
+  const recentDestination = useMemo(() => getRoute(recentId), [recentId]);
+  const activeSlide = PROMO_SLIDES[activePromo];
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -228,7 +351,9 @@ export default function Home() {
       }
     };
 
-    const mergedTracking = mergeTracking(readStoredTracking(), readTrackingFromLocation());
+    const locationTracking = readTrackingFromLocation();
+    const storedTracking = readStoredTracking();
+    const mergedTracking = mergeTracking(storedTracking, locationTracking);
 
     setTracking(mergedTracking);
     persistTracking(mergedTracking);
@@ -246,13 +371,20 @@ export default function Home() {
       navigator.serviceWorker.register("/sw.js").catch(console.error);
     }
 
-    const splashTimer = window.setTimeout(() => setShowSplash(false), 1150);
+    const splashTimer = window.setTimeout(() => setShowSplash(false), 950);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleInstalled);
       window.clearTimeout(splashTimer);
     };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActivePromo((prev) => (prev + 1) % PROMO_SLIDES.length);
+    }, 4200);
+    return () => window.clearInterval(timer);
   }, []);
 
   async function handleInstall() {
@@ -277,253 +409,278 @@ export default function Home() {
 
   if (showSplash) {
     return (
-      <main className="splash-shell">
-        <div className="splash-screen">
-          <div className="splash-logo-wrap">
-            <img src="/icons/icon-192.png" alt="Toshi.bet" className="splash-logo" />
-          </div>
-          <div className="splash-wordmark">Toshi.bet</div>
-          <div className="splash-dots" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-            <span />
-            <span />
-          </div>
+      <main className="app splash-screen">
+        <div className="splash-mark">
+          <img src={ASSETS.appIcon} alt="Toshi.bet" className="splash-logo" />
+        </div>
+        <div className="splash-brand">Toshi.bet</div>
+        <div className="splash-track">
+          <span />
         </div>
 
         <style jsx global>{`
           :root {
             color-scheme: dark;
           }
+
           html,
           body {
             margin: 0;
             padding: 0;
-            background: #050812;
+            background: #060a12;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           }
+
           * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
           }
-          @keyframes splashFade {
-            from {
-              opacity: 0;
-              transform: translateY(16px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          @keyframes dotPulse {
+
+          @keyframes splashPulse {
             0%,
             100% {
-              opacity: 0.25;
-              transform: scale(0.92);
+              transform: scale(1);
+              box-shadow: 0 0 0 rgba(255, 117, 31, 0);
             }
             50% {
-              opacity: 1;
-              transform: scale(1);
+              transform: scale(1.04);
+              box-shadow: 0 0 32px rgba(255, 117, 31, 0.2);
+            }
+          }
+
+          @keyframes loadBar {
+            0% {
+              transform: translateX(-120%);
+            }
+            100% {
+              transform: translateX(250%);
             }
           }
         `}</style>
 
         <style jsx>{`
-          .splash-shell {
+          .app {
             min-height: 100vh;
+            color: #fff;
+          }
+
+          .splash-screen {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             background:
-              radial-gradient(circle at 50% 18%, rgba(255, 117, 31, 0.3) 0%, rgba(255, 117, 31, 0.07) 26%, rgba(5, 8, 18, 1) 60%),
-              linear-gradient(180deg, #050812 0%, #07101a 100%);
-            color: #fff;
-            overflow: hidden;
+              radial-gradient(circle at 50% 18%, rgba(255,117,31,0.3) 0%, rgba(255,117,31,0.06) 24%, rgba(6,10,18,1) 58%),
+              linear-gradient(180deg, #060a12 0%, #09111b 100%);
+            padding: 24px;
           }
-          .splash-screen {
-            width: min(100%, 360px);
-            padding: 28px;
-            text-align: center;
-            animation: splashFade 0.5s ease;
-          }
-          .splash-logo-wrap {
-            width: 94px;
-            height: 94px;
-            margin: 0 auto 22px;
+
+          .splash-mark {
+            width: 96px;
+            height: 96px;
             border-radius: 28px;
-            border: 1px solid rgba(255, 117, 31, 0.3);
-            background: linear-gradient(180deg, rgba(255, 117, 31, 0.18), rgba(255, 117, 31, 0.05));
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34), 0 0 48px rgba(255, 117, 31, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
+            background: linear-gradient(180deg, rgba(255,117,31,0.18), rgba(255,117,31,0.04));
+            border: 1px solid rgba(255,117,31,0.32);
+            animation: splashPulse 1.8s ease-in-out infinite;
           }
+
           .splash-logo {
-            width: 56px;
-            height: 56px;
+            width: 54px;
+            height: 54px;
             object-fit: contain;
           }
-          .splash-wordmark {
-            font-size: 36px;
+
+          .splash-brand {
+            margin-top: 18px;
+            font-size: 34px;
             font-weight: 900;
             letter-spacing: -0.05em;
           }
-          .splash-dots {
+
+          .splash-track {
             margin-top: 26px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-          }
-          .splash-dots span {
-            width: 10px;
-            height: 10px;
+            width: 124px;
+            height: 5px;
             border-radius: 999px;
-            background: #ff751f;
-            animation: dotPulse 1.15s ease-in-out infinite;
+            overflow: hidden;
+            background: rgba(255,255,255,0.08);
           }
-          .splash-dots span:nth-child(2) { animation-delay: 0.1s; }
-          .splash-dots span:nth-child(3) { animation-delay: 0.2s; }
-          .splash-dots span:nth-child(4) { animation-delay: 0.3s; }
-          .splash-dots span:nth-child(5) { animation-delay: 0.4s; }
+
+          .splash-track span {
+            display: block;
+            width: 42%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255,117,31,0), #ff751f, rgba(255,117,31,0));
+            animation: loadBar 1.05s linear infinite;
+          }
         `}</style>
       </main>
     );
   }
 
   return (
-    <main className="app-shell">
-      <div className="app-bg" />
+    <main className="app shell">
+      <div className="bg-orb bg-orb-a" />
+      <div className="bg-orb bg-orb-b" />
 
-      <div className="app-wrap">
+      <div className="wrap">
         <header className="topbar">
-          <div className="topbar-left">
-            <div className="brand-box">
-              <img src="/icons/icon-192.png" alt="Toshi.bet" className="brand-icon" />
+          <div className="brand">
+            <div className="brand-logo-box">
+              <img src={ASSETS.appIcon} alt="Toshi.bet" className="brand-logo-icon" />
             </div>
-            <div>
-              <div className="brand-name">Toshi.bet</div>
-              <div className="brand-mode">{installed ? "App" : "Web App"}</div>
+
+            <div className="brand-copy">
+              <img src={ASSETS.topLogo} alt="Toshi.bet" className="brand-logo-wordmark" />
+              <div className="brand-status">{installed ? "Installed" : "Ready to install"}</div>
             </div>
           </div>
 
-          <div className="topbar-right">
-            <button className="top-action muted" onClick={() => handleRoute(utilityRoutes[1])}>
-              Deposit
+          <div className="topbar-actions">
+            <button className="icon-button" aria-label="Search">
+              <SearchIcon />
             </button>
-            <button className="top-action primary" onClick={() => handleRoute(coreRoutes[0])}>
-              Play
+            <button className="icon-button" aria-label="Menu">
+              <MenuIcon />
             </button>
           </div>
         </header>
 
-        <section className="hero-panel">
-          <div className="hero-status-row">
-            <span className="hero-badge">LIVE</span>
-            <span className="hero-subbadge">{installed ? "Installed" : "Install available"}</span>
-          </div>
-
-          <h1 className="hero-title">Play faster.</h1>
-
-          <div className="hero-actions">
-            <button className="hero-primary" onClick={() => handleRoute(continueRoute)}>
-              Continue · {continueRoute.title}
-            </button>
-            <button className="hero-secondary" onClick={() => handleRoute(coreRoutes[1])}>
-              Sports
-            </button>
-          </div>
-
-          <div className="hero-strip">
-            <div className="hero-stat">
-              <span>Recent</span>
-              <strong>{continueRoute.title}</strong>
-            </div>
-            <div className="hero-stat">
-              <span>Tracking</span>
-              <strong>{Object.keys(tracking).length ? "Saved" : "Ready"}</strong>
-            </div>
-            <div className="hero-stat">
-              <span>Mode</span>
-              <strong>{installed ? "App" : "PWA"}</strong>
-            </div>
-          </div>
-
-          {!installed && !installDismissed && (deferredPrompt || showIOSInstall) && (
-            <div className="install-card">
-              <div className="install-copy-wrap">
-                <div className="install-title">Install app</div>
-                <div className="install-copy">Faster open. Better return visits.</div>
-              </div>
-
-              <div className="install-buttons">
-                {deferredPrompt ? (
-                  <button className="mini-primary" onClick={handleInstall}>
-                    Install
-                  </button>
-                ) : showIOSInstall ? (
-                  <div className="ios-copy">Share → Add to Home Screen</div>
-                ) : null}
-                <button className="mini-ghost" onClick={dismissInstallCard}>
-                  Later
-                </button>
-              </div>
-            </div>
-          )}
+        <section className="auth-strip">
+          <button className="login-button" onClick={() => handleRoute(getRoute("casino"))}>Play</button>
+          <button className="register-button" onClick={() => handleRoute(getRoute("deposit"))}>Deposit</button>
         </section>
 
-        <section className="section-row section-row-tight">
-          <div className="section-title">Top</div>
-          <div className="chip-row">
-            {coreRoutes.map((route) => (
-              <button key={route.id} className="route-chip" onClick={() => handleRoute(route)}>
-                {route.title}
-              </button>
-            ))}
-          </div>
-        </section>
+        {!installed && !installDismissed && (deferredPrompt || showIOSInstall) && (
+          <section className="install-bar">
+            <div className="install-copy">
+              <strong>Install app</strong>
+              <span>{showIOSInstall && !deferredPrompt ? "Share → Add to Home Screen" : "Launch from home screen for the best experience"}</span>
+            </div>
+            <div className="install-actions">
+              {deferredPrompt && (
+                <button className="mini-primary" onClick={handleInstall}>Install</button>
+              )}
+              <button className="mini-ghost" onClick={dismissInstallCard}>Later</button>
+            </div>
+          </section>
+        )}
 
-        <section className="featured-grid">
-          {coreRoutes.map((route, index) => (
+        <section className="home-tabs">
+          {["top", "sports", "casino", "rewards"].map((tab) => (
             <button
-              key={route.id}
-              className={`featured-card ${index < 2 ? "featured-card-large" : ""}`}
-              onClick={() => handleRoute(route)}
+              key={tab}
+              className={`home-tab ${activeHomeTab === tab ? "active" : ""}`}
+              onClick={() => setActiveHomeTab(tab)}
             >
-              <div className="featured-top">
-                <span className="featured-icon">{route.icon}</span>
-                {route.label ? <span className="featured-label">{route.label}</span> : null}
-              </div>
-              <div className="featured-bottom">
-                <strong>{route.title}</strong>
-                <span>{route.subtitle}</span>
-              </div>
+              {tab === "top" ? "Top" : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </section>
 
-        <section className="banner-card">
-          <div>
-            <div className="banner-kicker">TOURNAMENT</div>
-            <div className="banner-title">Last Man Standing</div>
+        <section
+          className="promo-panel"
+          style={{
+            backgroundImage: `linear-gradient(90deg, rgba(6,10,18,0.88) 0%, rgba(6,10,18,0.62) 46%, rgba(6,10,18,0.20) 100%), url(${activeSlide.image})`,
+          }}
+        >
+          <div className="promo-overlay" />
+          <div className="promo-content">
+            <div className="promo-eyebrow">{activeSlide.eyebrow}</div>
+            <h1 className="promo-title">{activeSlide.title}</h1>
+            <p className="promo-copy">{activeSlide.copy}</p>
+
+            <div className="promo-actions">
+              <button className="promo-primary" onClick={() => handleRoute(getRoute(activeSlide.routeId))}>
+                {activeSlide.cta}
+              </button>
+              <button className="promo-secondary" onClick={() => handleRoute(recentDestination)}>
+                Continue
+              </button>
+            </div>
+
+            <div className="promo-dots">
+              {PROMO_SLIDES.map((slide, index) => (
+                <button
+                  key={slide.id}
+                  className={`dot ${index === activePromo ? "active" : ""}`}
+                  onClick={() => setActivePromo(index)}
+                  aria-label={`Show slide ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
-          <button className="banner-button" onClick={() => handleRoute(utilityRoutes[0])}>
-            Open
-          </button>
         </section>
 
-        <section className="section-row">
-          <div className="section-title">Quick actions</div>
+        <section className="icon-grid">
+          {topRoutes.map((route) => (
+            <button key={route.id} className="feature-card" onClick={() => handleRoute(route)}>
+              <div className="feature-icon">{getIcon(route.id)}</div>
+              <div className="feature-title">{route.title}</div>
+              <div className="feature-sub">{route.subtitle}</div>
+              {route.badge ? <div className="feature-badge">{route.badge}</div> : null}
+            </button>
+          ))}
+        </section>
+
+        <section className="row-head">
+          <h2>Popular now</h2>
+          <button className="row-link" onClick={() => handleRoute(getRoute("casino"))}>Open casino</button>
+        </section>
+
+        <section className="horizontal-row">
+          {POPULAR_ITEMS.map((item, index) => (
+            <button
+              key={`${item.title}-${index}`}
+              className="media-card"
+              onClick={() => handleRoute(getRoute(item.routeId))}
+            >
+              <div
+                className="media-art"
+                style={{
+                  backgroundImage: `linear-gradient(180deg, rgba(6,10,18,0.05) 0%, rgba(6,10,18,0.38) 100%), url(${item.image})`,
+                }}
+              />
+              <strong>{item.title}</strong>
+              <span>{item.sub}</span>
+            </button>
+          ))}
+        </section>
+
+        <section className="row-head compact">
+          <h2>Live routes</h2>
+          <button className="row-link" onClick={() => handleRoute(getRoute("sports"))}>Open sports</button>
+        </section>
+
+        <section className="live-list">
+          {[
+            { title: "Sports", value: "Live markets", routeId: "sports", badge: "Live" },
+            { title: "Last Man Standing", value: "Free entry", routeId: "lms", badge: "Free" },
+            { title: "Deposit", value: "Fast crypto", routeId: "deposit", badge: "Fast" },
+          ].map((item) => (
+            <button key={item.title} className="live-item" onClick={() => handleRoute(getRoute(item.routeId))}>
+              <div className="live-left">
+                <span className="live-badge">{item.badge}</span>
+                <strong>{item.title}</strong>
+              </div>
+              <div className="live-right">{item.value}</div>
+            </button>
+          ))}
+        </section>
+
+        <section className="row-head compact">
+          <h2>Quick actions</h2>
+          <button className="row-link" onClick={() => handleRoute(getRoute("affiliate"))}>More</button>
         </section>
 
         <section className="quick-grid">
-          {utilityRoutes.map((route) => (
+          {actionRoutes.map((route) => (
             <button key={route.id} className="quick-card" onClick={() => handleRoute(route)}>
-              <div className="quick-card-top">
-                <span className="quick-icon">{route.icon}</span>
-                {route.label ? <span className="quick-tag">{route.label}</span> : null}
-              </div>
+              <div className="quick-icon-box">{getIcon(route.id)}</div>
               <strong>{route.title}</strong>
               <span>{route.subtitle}</span>
             </button>
@@ -533,29 +690,33 @@ export default function Home() {
 
       <nav className="bottom-nav">
         {[
-          { id: "home", label: "Home" },
-          { id: "casino", label: "Casino", route: coreRoutes[0] },
-          { id: "sports", label: "Sports", route: coreRoutes[1] },
-          { id: "promo", label: "LMS", route: utilityRoutes[0] },
-          { id: "vip", label: "VIP", route: coreRoutes[3] },
+          { id: "home", label: "Home", icon: <HomeIcon /> },
+          { id: "casino", label: "Casino", icon: <SlotsIcon />, route: getRoute("casino") },
+          { id: "sports", label: "Sports", icon: <SportsIcon />, route: getRoute("sports") },
+          { id: "rewards", label: "Rewards", icon: <GiftIcon />, route: getRoute("rewards") },
+          { id: "vip", label: "VIP", icon: <CrownIcon />, route: getRoute("vip") },
         ].map((item) => (
           <button
             key={item.id}
-            className={`nav-button ${activeTab === item.id ? "active" : ""}`}
+            className={`nav-item ${activeNav === item.id ? "active" : ""}`}
             onClick={() => {
-              setActiveTab(item.id);
-              if (item.route) handleRoute(item.route);
-              else window.scrollTo({ top: 0, behavior: "smooth" });
+              setActiveNav(item.id);
+              if (item.route) {
+                handleRoute(item.route);
+              } else {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
             }}
           >
-            {item.label}
+            <span className="nav-icon">{item.icon}</span>
+            <span className="nav-label">{item.label}</span>
           </button>
         ))}
       </nav>
 
-      <div className="dock-cta">
-        <button className="dock-button" onClick={() => handleRoute(continueRoute)}>
-          Continue · {continueRoute.title}
+      <div className="sticky-bar">
+        <button className="sticky-main" onClick={() => handleRoute(recentDestination)}>
+          Continue to {recentDestination.title}
         </button>
       </div>
 
@@ -563,474 +724,681 @@ export default function Home() {
         :root {
           color-scheme: dark;
         }
+
         html,
         body {
           margin: 0;
           padding: 0;
-          background: #050812;
+          background: #060a12;
           font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
+
         * {
           box-sizing: border-box;
           -webkit-tap-highlight-color: transparent;
         }
+
         button {
-          border: 0;
           font: inherit;
+          border: 0;
           cursor: pointer;
+          color: inherit;
         }
-        @keyframes ctaPulse {
+
+        img {
+          display: block;
+        }
+
+        svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+
+        @keyframes pulseButton {
           0%,
-          100% { box-shadow: 0 14px 34px rgba(255, 117, 31, 0.22); }
-          50% { box-shadow: 0 18px 42px rgba(255, 117, 31, 0.34); }
+          100% {
+            box-shadow: 0 18px 34px rgba(255, 117, 31, 0.2);
+          }
+          50% {
+            box-shadow: 0 22px 44px rgba(255, 117, 31, 0.34);
+          }
         }
       `}</style>
 
       <style jsx>{`
-        .app-shell {
+        .app {
           min-height: 100vh;
-          color: #fff;
-          background:
-            radial-gradient(circle at top, rgba(255, 117, 31, 0.16) 0%, rgba(255, 117, 31, 0.05) 16%, rgba(5, 8, 18, 1) 45%),
-            linear-gradient(180deg, #050812 0%, #09111a 100%);
-          padding-bottom: 172px;
+          color: #ffffff;
+        }
+
+        .shell {
           position: relative;
+          overflow-x: hidden;
+          background:
+            radial-gradient(circle at top, rgba(255,117,31,0.16) 0%, rgba(255,117,31,0.06) 12%, rgba(6,10,18,1) 38%),
+            linear-gradient(180deg, #060a12 0%, #09111b 100%);
+          padding-bottom: 170px;
         }
-        .app-bg {
+
+        .bg-orb {
           position: fixed;
-          inset: 0;
+          border-radius: 999px;
           pointer-events: none;
-          background-image:
-            linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-          background-size: 28px 28px;
-          opacity: 0.3;
-          mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 72%);
+          filter: blur(22px);
+          opacity: 0.5;
         }
-        .app-wrap {
+
+        .bg-orb-a {
+          width: 220px;
+          height: 220px;
+          top: -40px;
+          left: -80px;
+          background: rgba(255,117,31,0.18);
+        }
+
+        .bg-orb-b {
+          width: 180px;
+          height: 180px;
+          top: 240px;
+          right: -90px;
+          background: rgba(0,162,255,0.1);
+        }
+
+        .wrap {
           position: relative;
           z-index: 1;
           width: min(100%, 520px);
           margin: 0 auto;
           padding: max(14px, env(safe-area-inset-top)) 14px 0;
         }
+
         .topbar {
           position: sticky;
           top: 0;
-          z-index: 40;
+          z-index: 30;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 12px;
+          gap: 10px;
           padding: 10px 2px 14px;
           backdrop-filter: blur(18px);
-          background: linear-gradient(180deg, rgba(5, 8, 18, 0.96), rgba(5, 8, 18, 0.72));
-          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+          background: linear-gradient(180deg, rgba(6,10,18,0.95), rgba(6,10,18,0.72));
         }
-        .topbar-left,
-        .topbar-right {
+
+        .brand {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
+          min-width: 0;
         }
-        .brand-box {
-          width: 48px;
-          height: 48px;
+
+        .brand-logo-box {
+          width: 46px;
+          height: 46px;
           border-radius: 16px;
-          border: 1px solid rgba(255, 117, 31, 0.24);
-          background: linear-gradient(180deg, rgba(255, 117, 31, 0.16), rgba(255, 117, 31, 0.05));
+          background: linear-gradient(180deg, rgba(255,117,31,0.18), rgba(255,117,31,0.05));
+          border: 1px solid rgba(255,117,31,0.28);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 14px 26px rgba(0, 0, 0, 0.25);
+          box-shadow: 0 18px 28px rgba(0,0,0,0.2);
+          flex-shrink: 0;
         }
-        .brand-icon {
+
+        .brand-logo-icon {
           width: 28px;
           height: 28px;
           object-fit: contain;
         }
-        .brand-name {
-          font-size: 22px;
-          font-weight: 900;
-          line-height: 1;
-          letter-spacing: -0.04em;
+
+        .brand-copy {
+          min-width: 0;
         }
-        .brand-mode {
+
+        .brand-logo-wordmark {
+          height: 22px;
+          width: auto;
+          max-width: 170px;
+          object-fit: contain;
+        }
+
+        .brand-status {
           margin-top: 4px;
           font-size: 12px;
-          color: rgba(255, 255, 255, 0.56);
+          color: rgba(255,255,255,0.56);
         }
-        .top-action {
-          min-height: 40px;
-          padding: 0 14px;
-          border-radius: 999px;
-          font-size: 12px;
-          font-weight: 800;
-        }
-        .top-action.muted {
-          background: rgba(255, 255, 255, 0.05);
-          color: #fff;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .top-action.primary {
-          background: linear-gradient(180deg, #ff8e45 0%, #ff751f 100%);
-          color: #fff;
-        }
-        .hero-panel {
-          margin-top: 14px;
-          border-radius: 30px;
-          padding: 22px;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 26px 68px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-          position: relative;
-          overflow: hidden;
-        }
-        .hero-panel::after {
-          content: "";
-          position: absolute;
-          right: -54px;
-          top: -78px;
-          width: 220px;
-          height: 220px;
-          border-radius: 999px;
-          background: radial-gradient(circle, rgba(255, 117, 31, 0.24) 0%, rgba(255, 117, 31, 0) 70%);
-        }
-        .hero-status-row,
-        .chip-row {
+
+        .topbar-actions {
           display: flex;
-          align-items: center;
           gap: 8px;
-          flex-wrap: wrap;
         }
-        .hero-badge,
-        .hero-subbadge,
-        .route-chip,
-        .featured-label,
-        .quick-tag {
-          border-radius: 999px;
-          font-weight: 800;
+
+        .icon-button {
+          width: 38px;
+          height: 38px;
+          padding: 9px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.06);
+          color: rgba(255,255,255,0.82);
         }
-        .hero-badge {
-          padding: 7px 10px;
-          background: rgba(255, 117, 31, 0.14);
-          border: 1px solid rgba(255, 117, 31, 0.24);
-          color: #ffb78b;
-          font-size: 11px;
-        }
-        .hero-subbadge {
-          padding: 7px 10px;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          color: rgba(255, 255, 255, 0.74);
-          font-size: 11px;
-        }
-        .hero-title {
-          margin: 18px 0 0;
-          font-size: clamp(40px, 11vw, 54px);
-          line-height: 0.94;
-          font-weight: 950;
-          letter-spacing: -0.06em;
-          position: relative;
-          z-index: 1;
-        }
-        .hero-actions {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          gap: 10px;
-          margin-top: 18px;
-          flex-wrap: wrap;
-        }
-        .hero-primary,
-        .hero-secondary,
-        .banner-button,
-        .dock-button {
-          min-height: 52px;
-          border-radius: 18px;
-          font-weight: 900;
-        }
-        .hero-primary,
-        .dock-button {
-          background: linear-gradient(180deg, #ff8e45 0%, #ff751f 100%);
-          color: #fff;
-          padding: 0 18px;
-          animation: ctaPulse 2.2s ease-in-out infinite;
-        }
-        .hero-primary { flex: 1 1 210px; }
-        .hero-secondary {
-          background: rgba(255, 255, 255, 0.06);
-          color: #fff;
-          padding: 0 18px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .hero-strip {
-          position: relative;
-          z-index: 1;
+
+        .auth-strip {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
+          grid-template-columns: 1fr 1fr;
           gap: 10px;
-          margin-top: 18px;
+          margin-top: 8px;
         }
-        .hero-stat {
-          min-width: 0;
-          border-radius: 18px;
-          padding: 14px 12px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .hero-stat span,
-        .quick-card span,
-        .featured-bottom span {
-          display: block;
-          color: rgba(255, 255, 255, 0.58);
-          font-size: 12px;
-        }
-        .hero-stat strong {
-          display: block;
-          margin-top: 7px;
-          font-size: 16px;
-          line-height: 1.2;
+
+        .login-button,
+        .register-button {
+          min-height: 46px;
+          border-radius: 14px;
           font-weight: 900;
         }
-        .install-card {
-          position: relative;
-          z-index: 1;
-          margin-top: 14px;
-          border-radius: 20px;
-          padding: 14px;
-          background: rgba(255, 255, 255, 0.045);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+
+        .login-button {
+          background: linear-gradient(180deg, #1b7cff 0%, #0457d8 100%);
+          color: #fff;
+        }
+
+        .register-button {
+          background: linear-gradient(180deg, #2fe977 0%, #0fb856 100%);
+          color: #05120a;
+        }
+
+        .install-bar {
+          margin-top: 12px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
+          padding: 12px 14px;
+          border-radius: 18px;
+          background: rgba(255,255,255,0.045);
+          border: 1px solid rgba(255,255,255,0.06);
         }
-        .install-title {
-          font-size: 14px;
-          font-weight: 900;
-        }
-        .install-copy,
-        .ios-copy {
-          margin-top: 4px;
-          color: rgba(255, 255, 255, 0.66);
-          font-size: 12px;
-        }
-        .install-buttons {
+
+        .install-copy {
           display: flex;
-          align-items: center;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .install-copy strong {
+          font-size: 13px;
+          line-height: 1.2;
+        }
+
+        .install-copy span {
+          font-size: 12px;
+          line-height: 1.35;
+          color: rgba(255,255,255,0.62);
+        }
+
+        .install-actions {
+          display: flex;
           gap: 8px;
           flex-shrink: 0;
         }
+
         .mini-primary,
         .mini-ghost {
-          min-height: 38px;
+          min-height: 36px;
           padding: 0 12px;
           border-radius: 12px;
           font-size: 12px;
           font-weight: 800;
         }
+
         .mini-primary {
           background: #ff751f;
           color: #fff;
         }
+
         .mini-ghost {
-          background: rgba(255, 255, 255, 0.06);
-          color: rgba(255, 255, 255, 0.86);
+          background: rgba(255,255,255,0.06);
+          color: rgba(255,255,255,0.82);
         }
-        .section-row {
-          margin-top: 22px;
+
+        .home-tabs {
+          display: flex;
+          gap: 8px;
+          margin-top: 14px;
+          overflow-x: auto;
+          padding-bottom: 2px;
+          scrollbar-width: none;
         }
-        .section-row-tight { margin-top: 16px; }
-        .section-title {
-          font-size: 18px;
-          font-weight: 900;
-          letter-spacing: -0.03em;
-          margin-bottom: 10px;
+
+        .home-tabs::-webkit-scrollbar,
+        .horizontal-row::-webkit-scrollbar {
+          display: none;
         }
-        .route-chip {
-          min-height: 34px;
-          padding: 0 12px;
-          background: rgba(255, 255, 255, 0.06);
-          color: #fff;
-          border: 1px solid rgba(255, 255, 255, 0.06);
+
+        .home-tab {
+          flex-shrink: 0;
+          min-height: 36px;
+          padding: 0 14px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.04);
+          color: rgba(255,255,255,0.68);
+          border: 1px solid rgba(255,255,255,0.05);
           font-size: 12px;
+          font-weight: 800;
         }
-        .featured-grid,
+
+        .home-tab.active {
+          background: rgba(255,117,31,0.12);
+          color: #ff9b5e;
+          border-color: rgba(255,117,31,0.16);
+        }
+
+        .promo-panel {
+          position: relative;
+          margin-top: 14px;
+          border-radius: 28px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.07);
+          min-height: 260px;
+          background-size: cover;
+          background-position: center;
+          box-shadow: 0 28px 60px rgba(0,0,0,0.34);
+        }
+
+        .promo-overlay {
+          position: absolute;
+          inset: 0;
+          background:
+            radial-gradient(circle at 20% 24%, rgba(255,117,31,0.22), transparent 30%),
+            radial-gradient(circle at 78% 78%, rgba(0,143,255,0.14), transparent 34%);
+          pointer-events: none;
+        }
+
+        .promo-content {
+          position: relative;
+          z-index: 1;
+          padding: 22px 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          min-height: 260px;
+        }
+
+        .promo-eyebrow {
+          color: #78c7ff;
+          font-size: 12px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .promo-title {
+          margin: 10px 0 8px;
+          font-size: clamp(30px, 7vw, 38px);
+          line-height: 0.98;
+          font-weight: 950;
+          letter-spacing: -0.05em;
+          max-width: 10ch;
+        }
+
+        .promo-copy {
+          margin: 0;
+          max-width: 28ch;
+          color: rgba(255,255,255,0.78);
+          font-size: 14px;
+          line-height: 1.55;
+          text-shadow: 0 2px 16px rgba(0,0,0,0.32);
+        }
+
+        .promo-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 18px;
+        }
+
+        .promo-primary,
+        .sticky-main {
+          background: linear-gradient(180deg, #ff8e45 0%, #ff751f 100%);
+          color: #fff;
+          border-radius: 16px;
+          font-weight: 900;
+          animation: pulseButton 2.2s ease-in-out infinite;
+        }
+
+        .promo-primary {
+          min-height: 46px;
+          padding: 0 16px;
+        }
+
+        .promo-secondary {
+          min-height: 46px;
+          padding: 0 16px;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.08);
+          color: #fff;
+          border: 1px solid rgba(255,255,255,0.08);
+          font-weight: 800;
+          backdrop-filter: blur(8px);
+        }
+
+        .promo-dots {
+          display: flex;
+          gap: 8px;
+          margin-top: 18px;
+        }
+
+        .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          padding: 0;
+          background: rgba(255,255,255,0.24);
+        }
+
+        .dot.active {
+          width: 24px;
+          background: #ff751f;
+        }
+
+        .icon-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          margin-top: 14px;
+        }
+
+        .feature-card {
+          position: relative;
+          min-height: 132px;
+          border-radius: 22px;
+          padding: 14px 10px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+          border: 1px solid rgba(255,255,255,0.07);
+          text-align: left;
+          box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon,
+        .quick-icon-box {
+          width: 38px;
+          height: 38px;
+          padding: 8px;
+          border-radius: 12px;
+          background: rgba(255,117,31,0.12);
+          color: #ff9b5e;
+          border: 1px solid rgba(255,117,31,0.16);
+        }
+
+        .feature-title {
+          margin-top: 12px;
+          font-size: 15px;
+          font-weight: 900;
+          line-height: 1.1;
+          letter-spacing: -0.02em;
+        }
+
+        .feature-sub {
+          margin-top: 6px;
+          font-size: 11px;
+          line-height: 1.35;
+          color: rgba(255,255,255,0.56);
+        }
+
+        .feature-badge {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          min-height: 22px;
+          padding: 0 8px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          background: rgba(255,255,255,0.07);
+          color: #ffbb92;
+          font-size: 10px;
+          font-weight: 800;
+        }
+
+        .row-head {
+          margin-top: 22px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+
+        .row-head.compact {
+          margin-top: 18px;
+        }
+
+        .row-head h2 {
+          margin: 0;
+          font-size: 20px;
+          letter-spacing: -0.03em;
+        }
+
+        .row-link {
+          background: transparent;
+          color: #7bbfff;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .horizontal-row {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          padding-top: 12px;
+          padding-bottom: 2px;
+          scrollbar-width: none;
+        }
+
+        .media-card {
+          flex: 0 0 148px;
+          border-radius: 22px;
+          padding: 12px;
+          text-align: left;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.06);
+          box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+        }
+
+        .media-art {
+          height: 112px;
+          border-radius: 16px;
+          margin-bottom: 12px;
+          background-size: cover;
+          background-position: center;
+        }
+
+        .media-card strong {
+          display: block;
+          font-size: 16px;
+          line-height: 1.1;
+          font-weight: 900;
+        }
+
+        .media-card span {
+          display: block;
+          margin-top: 6px;
+          font-size: 12px;
+          color: rgba(255,255,255,0.58);
+        }
+
+        .live-list {
+          margin-top: 12px;
+          display: grid;
+          gap: 10px;
+        }
+
+        .live-item {
+          min-height: 62px;
+          padding: 0 16px;
+          border-radius: 18px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.06);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          text-align: left;
+        }
+
+        .live-left {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+        }
+
+        .live-left strong {
+          font-size: 15px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .live-badge {
+          min-height: 24px;
+          padding: 0 8px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          background: rgba(255,117,31,0.1);
+          color: #ff9b5e;
+          font-size: 11px;
+          font-weight: 800;
+          flex-shrink: 0;
+        }
+
+        .live-right {
+          color: rgba(255,255,255,0.62);
+          font-size: 13px;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+
         .quick-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
+          margin-top: 12px;
         }
-        .featured-card,
+
         .quick-card {
-          color: #fff;
+          min-height: 118px;
+          padding: 16px;
+          border-radius: 22px;
           text-align: left;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.06);
+          box-shadow: 0 14px 28px rgba(0,0,0,0.18);
         }
-        .featured-card {
-          min-height: 142px;
-          border-radius: 24px;
-          padding: 18px;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22), inset 0 0 64px rgba(255, 117, 31, 0.09);
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-        }
-        .featured-card-large {
-          min-height: 168px;
-        }
-        .featured-top,
-        .quick-card-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
-        .featured-icon,
-        .quick-icon {
-          width: 44px;
-          height: 44px;
-          border-radius: 14px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(255, 117, 31, 0.12);
-          border: 1px solid rgba(255, 117, 31, 0.2);
-          font-size: 20px;
-        }
-        .featured-label,
-        .quick-tag {
-          padding: 7px 10px;
-          background: rgba(255, 255, 255, 0.08);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          color: #ffb78b;
-          font-size: 11px;
-        }
-        .featured-bottom strong,
+
         .quick-card strong {
           display: block;
-          font-size: 21px;
+          margin-top: 12px;
+          font-size: 16px;
+          line-height: 1.1;
           font-weight: 900;
-          line-height: 1.06;
-          letter-spacing: -0.03em;
         }
-        .featured-bottom span,
+
         .quick-card span {
-          margin-top: 7px;
-          line-height: 1.45;
-        }
-        .banner-card {
-          margin-top: 16px;
-          border-radius: 24px;
-          padding: 18px;
-          background: linear-gradient(135deg, rgba(255, 117, 31, 0.18), rgba(255, 255, 255, 0.04));
-          border: 1px solid rgba(255, 117, 31, 0.18);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
-        }
-        .banner-kicker {
-          font-size: 12px;
-          font-weight: 800;
-          color: #ffb78b;
-        }
-        .banner-title {
+          display: block;
           margin-top: 6px;
-          font-size: 24px;
-          font-weight: 900;
-          letter-spacing: -0.04em;
+          font-size: 12px;
+          line-height: 1.4;
+          color: rgba(255,255,255,0.58);
         }
-        .banner-button {
-          flex-shrink: 0;
-          padding: 0 16px;
-          background: #ff751f;
-          color: #fff;
-        }
-        .quick-card {
-          min-height: 122px;
-          border-radius: 22px;
-          padding: 16px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
-        }
+
         .bottom-nav {
           position: fixed;
           left: 0;
           right: 0;
-          bottom: calc(74px + env(safe-area-inset-bottom));
+          bottom: calc(72px + env(safe-area-inset-bottom));
           z-index: 40;
           width: min(calc(100% - 20px), 500px);
           margin: 0 auto;
-          padding: 8px;
-          border-radius: 22px;
-          background: rgba(8, 11, 20, 0.92);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          backdrop-filter: blur(18px);
-          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
           display: grid;
           grid-template-columns: repeat(5, 1fr);
           gap: 6px;
+          padding: 8px;
+          border-radius: 22px;
+          background: rgba(8,12,20,0.92);
+          border: 1px solid rgba(255,255,255,0.06);
+          backdrop-filter: blur(18px);
+          box-shadow: 0 18px 42px rgba(0,0,0,0.28);
         }
-        .nav-button {
-          min-height: 42px;
-          border-radius: 14px;
+
+        .nav-item {
+          min-height: 54px;
+          border-radius: 16px;
           background: transparent;
-          color: rgba(255, 255, 255, 0.66);
-          font-size: 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          color: rgba(255,255,255,0.6);
+        }
+
+        .nav-item.active {
+          background: rgba(255,117,31,0.1);
+          color: #ff9b5e;
+        }
+
+        .nav-icon {
+          width: 18px;
+          height: 18px;
+        }
+
+        .nav-label {
+          font-size: 10px;
           font-weight: 800;
         }
-        .nav-button.active {
-          background: rgba(255, 117, 31, 0.1);
-          color: #ff934f;
-        }
-        .dock-cta {
+
+        .sticky-bar {
           position: fixed;
           left: 0;
           right: 0;
           bottom: 0;
           z-index: 41;
           padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-          background: linear-gradient(180deg, rgba(5, 8, 18, 0), rgba(5, 8, 18, 0.94) 24%, rgba(5, 8, 18, 1) 100%);
+          background: linear-gradient(180deg, rgba(6,10,18,0), rgba(6,10,18,0.94) 24%, rgba(6,10,18,1) 100%);
         }
-        .dock-button {
+
+        .sticky-main {
           width: min(100%, 500px);
+          min-height: 54px;
           display: block;
           margin: 0 auto;
         }
-        @media (max-width: 430px) {
-          .topbar {
-            align-items: flex-start;
-            flex-direction: column;
+
+        @media (max-width: 460px) {
+          .icon-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
-          .topbar-right {
-            width: 100%;
+
+          .brand-logo-wordmark {
+            max-width: 140px;
+            height: 20px;
           }
-          .top-action {
-            flex: 1 1 0;
-          }
-          .hero-strip,
-          .featured-grid,
+        }
+
+        @media (max-width: 380px) {
           .quick-grid {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
           }
-          .install-card,
-          .banner-card {
+
+          .install-bar {
             flex-direction: column;
             align-items: stretch;
           }
-          .install-buttons {
-            justify-content: flex-end;
-          }
-        }
-        @media (max-width: 380px) {
-          .hero-strip,
-          .featured-grid,
-          .quick-grid {
-            grid-template-columns: 1fr;
+
+          .install-actions {
+            justify-content: space-between;
           }
         }
       `}</style>
