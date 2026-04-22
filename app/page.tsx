@@ -21,15 +21,14 @@ type TrackingParams = {
   utm_term?: string;
 };
 
-type Destination = {
+type RouteItem = {
   id: string;
   title: string;
-  subtitle: string;
-  badge?: string;
-  icon: string;
+  label?: string;
+  subtitle?: string;
   href: string;
-  accent: string;
-  glow: string;
+  icon: string;
+  featured?: boolean;
 };
 
 const TRACKING_KEYS = [
@@ -73,9 +72,7 @@ function readTrackingFromLocation(): TrackingParams {
 
   for (const key of TRACKING_KEYS) {
     const value = url.searchParams.get(key);
-    if (value) {
-      next[key] = value;
-    }
+    if (value) next[key] = value;
   }
 
   return next;
@@ -83,7 +80,6 @@ function readTrackingFromLocation(): TrackingParams {
 
 function readStoredTracking(): TrackingParams {
   if (typeof window === "undefined") return {};
-
   try {
     const raw = window.localStorage.getItem(STORAGE_KEYS.tracking);
     return raw ? JSON.parse(raw) : {};
@@ -130,105 +126,91 @@ export default function Home() {
   const [showIOSInstall, setShowIOSInstall] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [tracking, setTracking] = useState<TrackingParams>({});
-  const [activeNav, setActiveNav] = useState("home");
   const [recentId, setRecentId] = useState("casino");
   const [installDismissed, setInstallDismissed] = useState(false);
+  const [activeTab, setActiveTab] = useState("home");
 
-  const primaryCards = useMemo<Destination[]>(
+  const coreRoutes = useMemo<RouteItem[]>(
     () => [
       {
         id: "casino",
         title: "Casino",
-        subtitle: "Slots, live casino, originals",
-        badge: "Hot",
-        icon: "🎰",
+        label: "HOT",
+        subtitle: "Slots · Live · Originals",
         href: "https://toshi.bet",
-        accent: "#ff751f",
-        glow: "rgba(255,117,31,0.22)",
+        icon: "🎰",
+        featured: true,
       },
       {
         id: "sports",
         title: "Sports",
-        subtitle: "Live fixtures, props, parlays",
-        badge: "Live",
-        icon: "⚽",
+        label: "LIVE",
+        subtitle: "Matches · Props · Parlays",
         href: "https://toshi.bet/sports/home",
-        accent: "#ff8b3d",
-        glow: "rgba(255,117,31,0.16)",
+        icon: "⚽",
+        featured: true,
       },
       {
         id: "rewards",
         title: "Rewards",
-        subtitle: "Bonus flow, rakeback, loyalty",
-        badge: "Boost",
-        icon: "🎁",
+        label: "BOOST",
+        subtitle: "Bonus · Rakeback · Reloads",
         href: "https://toshi.bet/rewards",
-        accent: "#ffa05c",
-        glow: "rgba(255,117,31,0.14)",
+        icon: "🎁",
       },
       {
         id: "vip",
         title: "VIP",
-        subtitle: "Status tiers, perks, reloads",
-        badge: "Elite",
-        icon: "💎",
+        label: "ELITE",
+        subtitle: "Levels · Perks · Status",
         href: "https://toshi.bet/vip",
-        accent: "#ffb780",
-        glow: "rgba(255,117,31,0.10)",
+        icon: "💎",
       },
     ],
     []
   );
 
-  const quickActions = useMemo<Destination[]>(
+  const utilityRoutes = useMemo<RouteItem[]>(
     () => [
       {
         id: "lms",
         title: "Last Man Standing",
-        subtitle: "Free-to-play tournament funnel",
-        badge: "Free",
-        icon: "🏆",
+        label: "FREE",
+        subtitle: "Tournament",
         href: "https://toshi.bet/last-man-standing",
-        accent: "#ff751f",
-        glow: "rgba(255,117,31,0.18)",
-      },
-      {
-        id: "affiliate",
-        title: "Affiliate",
-        subtitle: "Partner signup and rev share",
-        badge: "B2B",
-        icon: "🤝",
-        href: "https://toshi.bet/affiliate",
-        accent: "#ff8b3d",
-        glow: "rgba(255,117,31,0.14)",
+        icon: "🏆",
       },
       {
         id: "deposit",
         title: "Deposit",
-        subtitle: "Fast crypto entry",
-        badge: "Fast",
-        icon: "💳",
+        label: "FAST",
+        subtitle: "Crypto",
         href: "https://toshi.bet/deposit",
-        accent: "#ffa05c",
-        glow: "rgba(255,117,31,0.14)",
+        icon: "⬇️",
+      },
+      {
+        id: "affiliate",
+        title: "Affiliate",
+        label: "REV",
+        subtitle: "Partner",
+        href: "https://toshi.bet/affiliate",
+        icon: "🤝",
       },
       {
         id: "support",
         title: "Support",
-        subtitle: "Help, FAQ, account issues",
-        badge: "24/7",
-        icon: "🛟",
+        label: "24/7",
+        subtitle: "Help",
         href: "https://toshi.bet/help",
-        accent: "#ffb780",
-        glow: "rgba(255,117,31,0.10)",
+        icon: "🛟",
       },
     ],
     []
   );
 
-  const recentDestination = useMemo(() => {
-    return [...primaryCards, ...quickActions].find((item) => item.id === recentId) || primaryCards[0];
-  }, [primaryCards, quickActions, recentId]);
+  const continueRoute = useMemo(() => {
+    return [...coreRoutes, ...utilityRoutes].find((route) => route.id === recentId) || coreRoutes[0];
+  }, [coreRoutes, utilityRoutes, recentId]);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -246,9 +228,7 @@ export default function Home() {
       }
     };
 
-    const locationTracking = readTrackingFromLocation();
-    const storedTracking = readStoredTracking();
-    const mergedTracking = mergeTracking(storedTracking, locationTracking);
+    const mergedTracking = mergeTracking(readStoredTracking(), readTrackingFromLocation());
 
     setTracking(mergedTracking);
     persistTracking(mergedTracking);
@@ -266,7 +246,7 @@ export default function Home() {
       navigator.serviceWorker.register("/sw.js").catch(console.error);
     }
 
-    const splashTimer = window.setTimeout(() => setShowSplash(false), 950);
+    const splashTimer = window.setTimeout(() => setShowSplash(false), 1150);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -282,10 +262,10 @@ export default function Home() {
     setDeferredPrompt(null);
   }
 
-  function handleRoute(destination: Destination) {
-    saveRecentDestination(destination.id);
-    setRecentId(destination.id);
-    window.location.href = withTracking(destination.href, tracking);
+  function handleRoute(route: RouteItem) {
+    saveRecentDestination(route.id);
+    setRecentId(route.id);
+    window.location.href = withTracking(route.href, tracking);
   }
 
   function dismissInstallCard() {
@@ -295,22 +275,20 @@ export default function Home() {
     }
   }
 
-  const trackingCount = Object.keys(tracking).length;
-
   if (showSplash) {
     return (
-      <main className="shell splash-shell">
-        <div className="splash-wrap">
-          <div className="splash-orb" />
-          <div className="splash-card">
-            <div className="splash-logo-box">
-              <img src="/icons/icon-192.png" alt="Toshi.bet" className="splash-logo" />
-            </div>
-            <div className="splash-title">Toshi.bet</div>
-            <div className="splash-subtitle">Crypto Casino &amp; Sportsbook</div>
-            <div className="splash-loader">
-              <span />
-            </div>
+      <main className="splash-shell">
+        <div className="splash-screen">
+          <div className="splash-logo-wrap">
+            <img src="/icons/icon-192.png" alt="Toshi.bet" className="splash-logo" />
+          </div>
+          <div className="splash-wordmark">Toshi.bet</div>
+          <div className="splash-dots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
           </div>
         </div>
 
@@ -318,232 +296,176 @@ export default function Home() {
           :root {
             color-scheme: dark;
           }
-
           html,
           body {
             margin: 0;
             padding: 0;
-            background: #070b13;
+            background: #050812;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           }
-
           * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
           }
-
-          @keyframes splashIn {
+          @keyframes splashFade {
             from {
               opacity: 0;
-              transform: translateY(18px) scale(0.98);
+              transform: translateY(16px);
             }
             to {
               opacity: 1;
-              transform: translateY(0) scale(1);
+              transform: translateY(0);
             }
           }
-
-          @keyframes splashPulse {
+          @keyframes dotPulse {
             0%,
             100% {
-              transform: scale(1);
-              opacity: 0.75;
+              opacity: 0.25;
+              transform: scale(0.92);
             }
             50% {
-              transform: scale(1.06);
               opacity: 1;
-            }
-          }
-
-          @keyframes loaderSweep {
-            0% {
-              transform: translateX(-100%);
-            }
-            100% {
-              transform: translateX(220%);
+              transform: scale(1);
             }
           }
         `}</style>
 
         <style jsx>{`
-          .shell {
-            min-height: 100vh;
-            color: #fff;
-          }
-
           .splash-shell {
-            background:
-              radial-gradient(circle at 50% 18%, rgba(255, 117, 31, 0.32) 0%, rgba(255, 117, 31, 0.08) 24%, rgba(7, 11, 19, 1) 58%),
-              linear-gradient(180deg, #070b13 0%, #090f18 100%);
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            background:
+              radial-gradient(circle at 50% 18%, rgba(255, 117, 31, 0.3) 0%, rgba(255, 117, 31, 0.07) 26%, rgba(5, 8, 18, 1) 60%),
+              linear-gradient(180deg, #050812 0%, #07101a 100%);
+            color: #fff;
             overflow: hidden;
           }
-
-          .splash-wrap {
-            position: relative;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            padding: 24px;
-          }
-
-          .splash-orb {
-            position: absolute;
-            width: 280px;
-            height: 280px;
-            border-radius: 999px;
-            background: radial-gradient(circle, rgba(255,117,31,0.18) 0%, rgba(255,117,31,0) 70%);
-            filter: blur(12px);
-            animation: splashPulse 2.2s ease-in-out infinite;
-          }
-
-          .splash-card {
-            position: relative;
-            z-index: 1;
+          .splash-screen {
             width: min(100%, 360px);
+            padding: 28px;
             text-align: center;
-            animation: splashIn 0.48s ease;
+            animation: splashFade 0.5s ease;
           }
-
-          .splash-logo-box {
-            width: 92px;
-            height: 92px;
-            margin: 0 auto 18px;
+          .splash-logo-wrap {
+            width: 94px;
+            height: 94px;
+            margin: 0 auto 22px;
             border-radius: 28px;
-            border: 1px solid rgba(255, 117, 31, 0.32);
-            background: linear-gradient(180deg, rgba(255,117,31,0.18), rgba(255,117,31,0.04));
+            border: 1px solid rgba(255, 117, 31, 0.3);
+            background: linear-gradient(180deg, rgba(255, 117, 31, 0.18), rgba(255, 117, 31, 0.05));
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.34), 0 0 48px rgba(255, 117, 31, 0.18);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 28px 50px rgba(0, 0, 0, 0.34), 0 0 40px rgba(255, 117, 31, 0.14);
           }
-
           .splash-logo {
-            width: 54px;
-            height: 54px;
+            width: 56px;
+            height: 56px;
             object-fit: contain;
           }
-
-          .splash-title {
+          .splash-wordmark {
             font-size: 36px;
-            line-height: 1;
             font-weight: 900;
             letter-spacing: -0.05em;
           }
-
-          .splash-subtitle {
-            margin-top: 10px;
-            color: rgba(255, 255, 255, 0.64);
-            font-size: 14px;
+          .splash-dots {
+            margin-top: 26px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
           }
-
-          .splash-loader {
-            width: 120px;
-            height: 5px;
-            margin: 22px auto 0;
-            overflow: hidden;
+          .splash-dots span {
+            width: 10px;
+            height: 10px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
+            background: #ff751f;
+            animation: dotPulse 1.15s ease-in-out infinite;
           }
-
-          .splash-loader span {
-            display: block;
-            width: 40%;
-            height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(255,117,31,0.15), #ff751f, rgba(255,117,31,0.15));
-            animation: loaderSweep 1.2s ease-in-out infinite;
-          }
+          .splash-dots span:nth-child(2) { animation-delay: 0.1s; }
+          .splash-dots span:nth-child(3) { animation-delay: 0.2s; }
+          .splash-dots span:nth-child(4) { animation-delay: 0.3s; }
+          .splash-dots span:nth-child(5) { animation-delay: 0.4s; }
         `}</style>
       </main>
     );
   }
 
   return (
-    <main className="shell app-shell">
-      <div className="background-grid" />
-      <div className="content-wrap">
+    <main className="app-shell">
+      <div className="app-bg" />
+
+      <div className="app-wrap">
         <header className="topbar">
-          <div className="brand-block">
-            <div className="brand-logo-box">
-              <img src="/icons/icon-192.png" alt="Toshi.bet" className="brand-logo" />
+          <div className="topbar-left">
+            <div className="brand-box">
+              <img src="/icons/icon-192.png" alt="Toshi.bet" className="brand-icon" />
             </div>
             <div>
               <div className="brand-name">Toshi.bet</div>
-              <div className="brand-sub">Installable crypto casino shell</div>
+              <div className="brand-mode">{installed ? "App" : "Web App"}</div>
             </div>
           </div>
 
-          <button className="ghost-chip" onClick={() => handleRoute(primaryCards[0])}>
-            Open
-          </button>
+          <div className="topbar-right">
+            <button className="top-action muted" onClick={() => handleRoute(utilityRoutes[1])}>
+              Deposit
+            </button>
+            <button className="top-action primary" onClick={() => handleRoute(coreRoutes[0])}>
+              Play
+            </button>
+          </div>
         </header>
 
-        <section className="hero-card">
-          <div className="hero-topline">
-            <span className="status-dot" />
-            {installed ? "Installed mode active" : "Mobile app mode available"}
+        <section className="hero-panel">
+          <div className="hero-status-row">
+            <span className="hero-badge">LIVE</span>
+            <span className="hero-subbadge">{installed ? "Installed" : "Install available"}</span>
           </div>
 
-          <div className="hero-row">
-            <div>
-              <h1 className="hero-title">
-                Built to feel like an app.
-                <br />
-                Tuned to convert like a funnel.
-              </h1>
-              <p className="hero-copy">
-                Give affiliates a clean installable shell that gets users into Casino, Sports, Rewards,
-                VIP, and LMS with less friction and better session continuity.
-              </p>
-            </div>
+          <h1 className="hero-title">Play faster.</h1>
+
+          <div className="hero-actions">
+            <button className="hero-primary" onClick={() => handleRoute(continueRoute)}>
+              Continue · {continueRoute.title}
+            </button>
+            <button className="hero-secondary" onClick={() => handleRoute(coreRoutes[1])}>
+              Sports
+            </button>
           </div>
 
-          <div className="hero-metrics">
-            <div className="metric-card">
-              <span>Mode</span>
-              <strong>{installed ? "Installed" : "Web + Install"}</strong>
+          <div className="hero-strip">
+            <div className="hero-stat">
+              <span>Recent</span>
+              <strong>{continueRoute.title}</strong>
             </div>
-            <div className="metric-card">
+            <div className="hero-stat">
               <span>Tracking</span>
-              <strong>{trackingCount > 0 ? `${trackingCount} params saved` : "Ready"}</strong>
+              <strong>{Object.keys(tracking).length ? "Saved" : "Ready"}</strong>
             </div>
-            <div className="metric-card">
-              <span>Focus</span>
-              <strong>Click → Deposit</strong>
+            <div className="hero-stat">
+              <span>Mode</span>
+              <strong>{installed ? "App" : "PWA"}</strong>
             </div>
-          </div>
-
-          <div className="hero-cta-row">
-            <button className="primary-cta" onClick={() => handleRoute(recentDestination)}>
-              Continue to {recentDestination.title}
-            </button>
-            <button className="secondary-cta" onClick={() => handleRoute(primaryCards[0])}>
-              Open Casino
-            </button>
           </div>
 
           {!installed && !installDismissed && (deferredPrompt || showIOSInstall) && (
             <div className="install-card">
-              <div>
-                <div className="install-title">Install for a real app feel</div>
-                <div className="install-copy">
-                  Better return visits, cleaner relaunches, and a much stronger in-app style experience.
-                </div>
+              <div className="install-copy-wrap">
+                <div className="install-title">Install app</div>
+                <div className="install-copy">Faster open. Better return visits.</div>
               </div>
 
-              <div className="install-actions">
-                {!installed && deferredPrompt && (
-                  <button className="small-primary" onClick={handleInstall}>
-                    Install now
+              <div className="install-buttons">
+                {deferredPrompt ? (
+                  <button className="mini-primary" onClick={handleInstall}>
+                    Install
                   </button>
-                )}
-                {!installed && showIOSInstall && !deferredPrompt && (
-                  <div className="ios-tip">Tap Share → Add to Home Screen</div>
-                )}
-                <button className="small-ghost" onClick={dismissInstallCard}>
+                ) : showIOSInstall ? (
+                  <div className="ios-copy">Share → Add to Home Screen</div>
+                ) : null}
+                <button className="mini-ghost" onClick={dismissInstallCard}>
                   Later
                 </button>
               </div>
@@ -551,106 +473,79 @@ export default function Home() {
           )}
         </section>
 
-        <section className="mini-strip">
-          <div className="mini-card mini-card-accent">
-            <span>Recent destination</span>
-            <strong>{recentDestination.title}</strong>
-          </div>
-          <div className="mini-card">
-            <span>Affiliate-friendly</span>
-            <strong>Params persist</strong>
-          </div>
-          <div className="mini-card">
-            <span>UX intent</span>
-            <strong>Native shell</strong>
+        <section className="section-row section-row-tight">
+          <div className="section-title">Top</div>
+          <div className="chip-row">
+            {coreRoutes.map((route) => (
+              <button key={route.id} className="route-chip" onClick={() => handleRoute(route)}>
+                {route.title}
+              </button>
+            ))}
           </div>
         </section>
 
-        <section className="section-head">
-          <div>
-            <h2>Core access</h2>
-            <p>Primary money paths should sit above everything else.</p>
-          </div>
-        </section>
-
-        <section className="grid-cards">
-          {primaryCards.map((card) => (
+        <section className="featured-grid">
+          {coreRoutes.map((route, index) => (
             <button
-              key={card.id}
-              className="app-card"
-              onClick={() => handleRoute(card)}
-              style={{ boxShadow: `0 20px 42px rgba(0,0,0,0.28), inset 0 0 70px ${card.glow}` }}
+              key={route.id}
+              className={`featured-card ${index < 2 ? "featured-card-large" : ""}`}
+              onClick={() => handleRoute(route)}
             >
-              <div className="card-top">
-                <div className="icon-box">{card.icon}</div>
-                {card.badge ? <div className="pill-badge">{card.badge}</div> : null}
+              <div className="featured-top">
+                <span className="featured-icon">{route.icon}</span>
+                {route.label ? <span className="featured-label">{route.label}</span> : null}
               </div>
-              <div className="card-body">
-                <strong>{card.title}</strong>
-                <span>{card.subtitle}</span>
+              <div className="featured-bottom">
+                <strong>{route.title}</strong>
+                <span>{route.subtitle}</span>
               </div>
             </button>
           ))}
         </section>
 
-        <section className="promo-banner">
+        <section className="banner-card">
           <div>
-            <div className="promo-label">High-conversion route</div>
-            <div className="promo-title">Use LMS as the low-friction hook, then pull users into Casino and Rewards.</div>
+            <div className="banner-kicker">TOURNAMENT</div>
+            <div className="banner-title">Last Man Standing</div>
           </div>
-          <button className="promo-button" onClick={() => handleRoute(quickActions[0])}>
-            Open LMS
+          <button className="banner-button" onClick={() => handleRoute(utilityRoutes[0])}>
+            Open
           </button>
         </section>
 
-        <section className="section-head compact-gap">
-          <div>
-            <h2>Quick actions</h2>
-            <p>Secondary routes still need to feel instant and app-native.</p>
-          </div>
+        <section className="section-row">
+          <div className="section-title">Quick actions</div>
         </section>
 
         <section className="quick-grid">
-          {quickActions.map((card) => (
-            <button key={card.id} className="quick-card" onClick={() => handleRoute(card)}>
-              <div className="quick-top">
-                <span className="quick-icon">{card.icon}</span>
-                {card.badge ? <span className="quick-badge">{card.badge}</span> : null}
+          {utilityRoutes.map((route) => (
+            <button key={route.id} className="quick-card" onClick={() => handleRoute(route)}>
+              <div className="quick-card-top">
+                <span className="quick-icon">{route.icon}</span>
+                {route.label ? <span className="quick-tag">{route.label}</span> : null}
               </div>
-              <strong>{card.title}</strong>
-              <span>{card.subtitle}</span>
+              <strong>{route.title}</strong>
+              <span>{route.subtitle}</span>
             </button>
           ))}
-        </section>
-
-        <section className="trust-panel">
-          <div className="trust-head">Why this version converts better</div>
-          <ul>
-            <li>Recent destination memory makes re-entry feel like a real app, not a static landing page.</li>
-            <li>Affiliate parameters are captured once and carried forward into outbound Toshi.bet routes.</li>
-            <li>The first screen prioritizes the action most likely to monetize, instead of generic browsing.</li>
-          </ul>
         </section>
       </div>
 
       <nav className="bottom-nav">
         {[
           { id: "home", label: "Home" },
-          { id: "casino", label: "Casino", route: primaryCards[0] },
-          { id: "sports", label: "Sports", route: primaryCards[1] },
-          { id: "lms", label: "LMS", route: quickActions[0] },
-          { id: "menu", label: "VIP", route: primaryCards[3] },
+          { id: "casino", label: "Casino", route: coreRoutes[0] },
+          { id: "sports", label: "Sports", route: coreRoutes[1] },
+          { id: "promo", label: "LMS", route: utilityRoutes[0] },
+          { id: "vip", label: "VIP", route: coreRoutes[3] },
         ].map((item) => (
           <button
             key={item.id}
-            className={`nav-item ${activeNav === item.id ? "active" : ""}`}
+            className={`nav-button ${activeTab === item.id ? "active" : ""}`}
             onClick={() => {
-              setActiveNav(item.id);
-              if (item.route) {
-                handleRoute(item.route);
-              } else {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }
+              setActiveTab(item.id);
+              if (item.route) handleRoute(item.route);
+              else window.scrollTo({ top: 0, behavior: "smooth" });
             }}
           >
             {item.label}
@@ -658,9 +553,9 @@ export default function Home() {
         ))}
       </nav>
 
-      <div className="sticky-launchbar">
-        <button className="sticky-primary" onClick={() => handleRoute(recentDestination)}>
-          Continue to {recentDestination.title}
+      <div className="dock-cta">
+        <button className="dock-button" onClick={() => handleRoute(continueRoute)}>
+          Continue · {continueRoute.title}
         </button>
       </div>
 
@@ -668,207 +563,208 @@ export default function Home() {
         :root {
           color-scheme: dark;
         }
-
         html,
         body {
           margin: 0;
           padding: 0;
-          background: #070b13;
+          background: #050812;
           font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-
         * {
           box-sizing: border-box;
           -webkit-tap-highlight-color: transparent;
         }
-
-        button,
-        a {
-          font: inherit;
-        }
-
         button {
           border: 0;
+          font: inherit;
           cursor: pointer;
         }
-
-        @keyframes pulseShadow {
+        @keyframes ctaPulse {
           0%,
-          100% {
-            box-shadow: 0 18px 34px rgba(255, 117, 31, 0.22);
-          }
-          50% {
-            box-shadow: 0 22px 42px rgba(255, 117, 31, 0.34);
-          }
+          100% { box-shadow: 0 14px 34px rgba(255, 117, 31, 0.22); }
+          50% { box-shadow: 0 18px 42px rgba(255, 117, 31, 0.34); }
         }
       `}</style>
 
       <style jsx>{`
-        .shell {
+        .app-shell {
           min-height: 100vh;
           color: #fff;
-        }
-
-        .app-shell {
           background:
-            radial-gradient(circle at top, rgba(255,117,31,0.18) 0%, rgba(255,117,31,0.07) 14%, rgba(7,11,19,1) 42%),
-            linear-gradient(180deg, #070b13 0%, #0a1018 100%);
+            radial-gradient(circle at top, rgba(255, 117, 31, 0.16) 0%, rgba(255, 117, 31, 0.05) 16%, rgba(5, 8, 18, 1) 45%),
+            linear-gradient(180deg, #050812 0%, #09111a 100%);
+          padding-bottom: 172px;
           position: relative;
-          padding-bottom: 176px;
         }
-
-        .background-grid {
+        .app-bg {
           position: fixed;
           inset: 0;
           pointer-events: none;
           background-image:
-            linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+            linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
           background-size: 28px 28px;
-          mask-image: linear-gradient(180deg, rgba(0,0,0,0.3), transparent 75%);
-          opacity: 0.35;
+          opacity: 0.3;
+          mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 72%);
         }
-
-        .content-wrap {
+        .app-wrap {
           position: relative;
           z-index: 1;
           width: min(100%, 520px);
           margin: 0 auto;
-          padding: max(16px, env(safe-area-inset-top)) 14px 0;
+          padding: max(14px, env(safe-area-inset-top)) 14px 0;
         }
-
         .topbar {
           position: sticky;
           top: 0;
-          z-index: 35;
+          z-index: 40;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
-          padding: 12px 2px 14px;
+          padding: 10px 2px 14px;
           backdrop-filter: blur(18px);
-          background: linear-gradient(180deg, rgba(7,11,19,0.94), rgba(7,11,19,0.72));
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          background: linear-gradient(180deg, rgba(5, 8, 18, 0.96), rgba(5, 8, 18, 0.72));
+          border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
-
-        .brand-block {
+        .topbar-left,
+        .topbar-right {
           display: flex;
           align-items: center;
-          gap: 12px;
-          min-width: 0;
+          gap: 10px;
         }
-
-        .brand-logo-box {
-          width: 50px;
-          height: 50px;
-          border-radius: 17px;
-          border: 1px solid rgba(255,117,31,0.24);
-          background: linear-gradient(180deg, rgba(255,117,31,0.16), rgba(255,117,31,0.05));
+        .brand-box {
+          width: 48px;
+          height: 48px;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 117, 31, 0.24);
+          background: linear-gradient(180deg, rgba(255, 117, 31, 0.16), rgba(255, 117, 31, 0.05));
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 18px 28px rgba(0,0,0,0.22);
-          flex-shrink: 0;
+          box-shadow: 0 14px 26px rgba(0, 0, 0, 0.25);
         }
-
-        .brand-logo {
-          width: 30px;
-          height: 30px;
+        .brand-icon {
+          width: 28px;
+          height: 28px;
           object-fit: contain;
         }
-
         .brand-name {
           font-size: 22px;
-          line-height: 1;
           font-weight: 900;
+          line-height: 1;
           letter-spacing: -0.04em;
         }
-
-        .brand-sub {
-          margin-top: 5px;
+        .brand-mode {
+          margin-top: 4px;
           font-size: 12px;
-          color: rgba(255,255,255,0.58);
+          color: rgba(255, 255, 255, 0.56);
         }
-
-        .ghost-chip {
-          background: rgba(255,255,255,0.05);
-          color: #fff;
-          padding: 11px 14px;
+        .top-action {
+          min-height: 40px;
+          padding: 0 14px;
           border-radius: 999px;
+          font-size: 12px;
           font-weight: 800;
-          border: 1px solid rgba(255,255,255,0.08);
-          flex-shrink: 0;
         }
-
-        .hero-card {
-          margin-top: 16px;
-          position: relative;
-          overflow: hidden;
+        .top-action.muted {
+          background: rgba(255, 255, 255, 0.05);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .top-action.primary {
+          background: linear-gradient(180deg, #ff8e45 0%, #ff751f 100%);
+          color: #fff;
+        }
+        .hero-panel {
+          margin-top: 14px;
           border-radius: 30px;
           padding: 22px;
-          background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
-          border: 1px solid rgba(255,255,255,0.08);
-          box-shadow: 0 30px 72px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.04);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 26px 68px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          position: relative;
+          overflow: hidden;
         }
-
-        .hero-card::after {
+        .hero-panel::after {
           content: "";
           position: absolute;
-          right: -60px;
-          top: -80px;
+          right: -54px;
+          top: -78px;
           width: 220px;
           height: 220px;
           border-radius: 999px;
-          background: radial-gradient(circle, rgba(255,117,31,0.24) 0%, rgba(255,117,31,0) 70%);
-          pointer-events: none;
+          background: radial-gradient(circle, rgba(255, 117, 31, 0.24) 0%, rgba(255, 117, 31, 0) 70%);
         }
-
-        .hero-topline {
-          position: relative;
-          z-index: 1;
-          display: inline-flex;
+        .hero-status-row,
+        .chip-row {
+          display: flex;
           align-items: center;
           gap: 8px;
-          padding: 8px 12px;
+          flex-wrap: wrap;
+        }
+        .hero-badge,
+        .hero-subbadge,
+        .route-chip,
+        .featured-label,
+        .quick-tag {
           border-radius: 999px;
-          background: rgba(255,117,31,0.12);
-          border: 1px solid rgba(255,117,31,0.22);
-          color: #ffae7b;
-          font-size: 12px;
           font-weight: 800;
         }
-
-        .status-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 999px;
-          background: #ff751f;
-          box-shadow: 0 0 14px rgba(255,117,31,0.6);
+        .hero-badge {
+          padding: 7px 10px;
+          background: rgba(255, 117, 31, 0.14);
+          border: 1px solid rgba(255, 117, 31, 0.24);
+          color: #ffb78b;
+          font-size: 11px;
         }
-
-        .hero-row {
+        .hero-subbadge {
+          padding: 7px 10px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.74);
+          font-size: 11px;
+        }
+        .hero-title {
+          margin: 18px 0 0;
+          font-size: clamp(40px, 11vw, 54px);
+          line-height: 0.94;
+          font-weight: 950;
+          letter-spacing: -0.06em;
           position: relative;
           z-index: 1;
         }
-
-        .hero-title {
-          margin: 16px 0 10px;
-          font-size: clamp(34px, 8vw, 44px);
-          line-height: 0.96;
-          letter-spacing: -0.055em;
-          font-weight: 950;
-          max-width: 11ch;
+        .hero-actions {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          gap: 10px;
+          margin-top: 18px;
+          flex-wrap: wrap;
         }
-
-        .hero-copy {
-          margin: 0;
-          max-width: 36ch;
-          color: rgba(255,255,255,0.74);
-          font-size: 15px;
-          line-height: 1.62;
+        .hero-primary,
+        .hero-secondary,
+        .banner-button,
+        .dock-button {
+          min-height: 52px;
+          border-radius: 18px;
+          font-weight: 900;
         }
-
-        .hero-metrics {
+        .hero-primary,
+        .dock-button {
+          background: linear-gradient(180deg, #ff8e45 0%, #ff751f 100%);
+          color: #fff;
+          padding: 0 18px;
+          animation: ctaPulse 2.2s ease-in-out infinite;
+        }
+        .hero-primary { flex: 1 1 210px; }
+        .hero-secondary {
+          background: rgba(255, 255, 255, 0.06);
+          color: #fff;
+          padding: 0 18px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .hero-strip {
           position: relative;
           z-index: 1;
           display: grid;
@@ -876,317 +772,191 @@ export default function Home() {
           gap: 10px;
           margin-top: 18px;
         }
-
-        .metric-card {
+        .hero-stat {
+          min-width: 0;
           border-radius: 18px;
           padding: 14px 12px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.06);
-          min-width: 0;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.06);
         }
-
-        .metric-card span {
+        .hero-stat span,
+        .quick-card span,
+        .featured-bottom span {
           display: block;
-          font-size: 11px;
-          color: rgba(255,255,255,0.52);
+          color: rgba(255, 255, 255, 0.58);
+          font-size: 12px;
         }
-
-        .metric-card strong {
+        .hero-stat strong {
           display: block;
-          margin-top: 8px;
+          margin-top: 7px;
           font-size: 16px;
           line-height: 1.2;
           font-weight: 900;
         }
-
-        .hero-cta-row {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 18px;
-        }
-
-        .primary-cta,
-        .sticky-primary {
-          background: linear-gradient(180deg, #ff8e45 0%, #ff751f 100%);
-          color: #fff;
-          font-weight: 900;
-          border-radius: 18px;
-          padding: 16px 18px;
-          animation: pulseShadow 2.2s ease-in-out infinite;
-        }
-
-        .primary-cta {
-          flex: 1 1 210px;
-        }
-
-        .secondary-cta {
-          flex: 0 0 auto;
-          background: rgba(255,255,255,0.06);
-          color: #fff;
-          font-weight: 800;
-          border-radius: 18px;
-          padding: 16px 18px;
-          border: 1px solid rgba(255,255,255,0.08);
-        }
-
         .install-card {
           position: relative;
           z-index: 1;
-          margin-top: 16px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 14px;
-          padding: 14px;
+          margin-top: 14px;
           border-radius: 20px;
-          background: rgba(255,255,255,0.045);
-          border: 1px solid rgba(255,255,255,0.06);
+          padding: 14px;
+          background: rgba(255, 255, 255, 0.045);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
         }
-
         .install-title {
           font-size: 14px;
           font-weight: 900;
         }
-
         .install-copy,
-        .ios-tip {
+        .ios-copy {
           margin-top: 4px;
+          color: rgba(255, 255, 255, 0.66);
           font-size: 12px;
-          line-height: 1.5;
-          color: rgba(255,255,255,0.66);
         }
-
-        .install-actions {
+        .install-buttons {
           display: flex;
-          flex-direction: column;
-          align-items: flex-end;
+          align-items: center;
           gap: 8px;
           flex-shrink: 0;
         }
-
-        .small-primary,
-        .small-ghost {
-          padding: 10px 12px;
+        .mini-primary,
+        .mini-ghost {
+          min-height: 38px;
+          padding: 0 12px;
           border-radius: 12px;
           font-size: 12px;
           font-weight: 800;
         }
-
-        .small-primary {
+        .mini-primary {
           background: #ff751f;
           color: #fff;
         }
-
-        .small-ghost {
-          background: rgba(255,255,255,0.06);
-          color: rgba(255,255,255,0.8);
+        .mini-ghost {
+          background: rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.86);
         }
-
-        .mini-strip {
-          margin-top: 16px;
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 10px;
+        .section-row {
+          margin-top: 22px;
         }
-
-        .mini-card {
-          border-radius: 18px;
-          padding: 14px 12px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .mini-card-accent {
-          background: linear-gradient(180deg, rgba(255,117,31,0.13), rgba(255,255,255,0.04));
-          border-color: rgba(255,117,31,0.16);
-        }
-
-        .mini-card span {
-          display: block;
-          font-size: 11px;
-          color: rgba(255,255,255,0.52);
-        }
-
-        .mini-card strong {
-          display: block;
-          margin-top: 8px;
-          font-size: 15px;
-          line-height: 1.2;
+        .section-row-tight { margin-top: 16px; }
+        .section-title {
+          font-size: 18px;
           font-weight: 900;
-        }
-
-        .section-head {
-          margin-top: 24px;
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 16px;
-        }
-
-        .compact-gap {
-          margin-top: 18px;
-        }
-
-        .section-head h2 {
-          margin: 0;
-          font-size: 20px;
           letter-spacing: -0.03em;
+          margin-bottom: 10px;
         }
-
-        .section-head p {
-          margin: 6px 0 0;
-          font-size: 13px;
-          color: rgba(255,255,255,0.58);
+        .route-chip {
+          min-height: 34px;
+          padding: 0 12px;
+          background: rgba(255, 255, 255, 0.06);
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          font-size: 12px;
         }
-
-        .grid-cards,
+        .featured-grid,
         .quick-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 12px;
-          margin-top: 12px;
         }
-
-        .app-card,
+        .featured-card,
         .quick-card {
-          text-align: left;
           color: #fff;
+          text-align: left;
         }
-
-        .app-card {
-          min-height: 158px;
+        .featured-card {
+          min-height: 142px;
           border-radius: 24px;
           padding: 18px;
-          background: linear-gradient(180deg, rgba(255,255,255,0.065), rgba(255,255,255,0.03));
-          border: 1px solid rgba(255,255,255,0.08);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22), inset 0 0 64px rgba(255, 117, 31, 0.09);
           display: flex;
           flex-direction: column;
           justify-content: space-between;
         }
-
-        .card-top,
-        .quick-top {
+        .featured-card-large {
+          min-height: 168px;
+        }
+        .featured-top,
+        .quick-card-top {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
+          gap: 8px;
         }
-
-        .icon-box {
-          width: 46px;
-          height: 46px;
-          border-radius: 15px;
-          display: flex;
+        .featured-icon,
+        .quick-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          background: rgba(255,117,31,0.12);
-          border: 1px solid rgba(255,117,31,0.2);
-          font-size: 21px;
+          background: rgba(255, 117, 31, 0.12);
+          border: 1px solid rgba(255, 117, 31, 0.2);
+          font-size: 20px;
         }
-
-        .pill-badge,
-        .quick-badge {
+        .featured-label,
+        .quick-tag {
           padding: 7px 10px;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.08);
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          color: #ffb78b;
           font-size: 11px;
-          font-weight: 800;
-          color: #ffba8f;
-          border: 1px solid rgba(255,255,255,0.06);
         }
-
-        .card-body strong,
+        .featured-bottom strong,
         .quick-card strong {
           display: block;
           font-size: 21px;
-          line-height: 1.05;
           font-weight: 900;
+          line-height: 1.06;
           letter-spacing: -0.03em;
         }
-
-        .card-body span,
+        .featured-bottom span,
         .quick-card span {
-          display: block;
           margin-top: 7px;
-          color: rgba(255,255,255,0.62);
-          font-size: 13px;
           line-height: 1.45;
         }
-
-        .promo-banner {
+        .banner-card {
           margin-top: 16px;
           border-radius: 24px;
           padding: 18px;
-          background: linear-gradient(135deg, rgba(255,117,31,0.18), rgba(255,255,255,0.04));
-          border: 1px solid rgba(255,117,31,0.18);
+          background: linear-gradient(135deg, rgba(255, 117, 31, 0.18), rgba(255, 255, 255, 0.04));
+          border: 1px solid rgba(255, 117, 31, 0.18);
           display: flex;
-          justify-content: space-between;
-          gap: 14px;
           align-items: center;
+          justify-content: space-between;
+          gap: 12px;
         }
-
-        .promo-label {
+        .banner-kicker {
           font-size: 12px;
           font-weight: 800;
-          color: #ffba8f;
+          color: #ffb78b;
         }
-
-        .promo-title {
+        .banner-title {
           margin-top: 6px;
-          font-size: 19px;
-          line-height: 1.2;
+          font-size: 24px;
           font-weight: 900;
-          letter-spacing: -0.03em;
+          letter-spacing: -0.04em;
         }
-
-        .promo-button {
+        .banner-button {
           flex-shrink: 0;
-          padding: 12px 14px;
-          border-radius: 14px;
+          padding: 0 16px;
           background: #ff751f;
           color: #fff;
-          font-weight: 900;
         }
-
         .quick-card {
-          min-height: 126px;
+          min-height: 122px;
           border-radius: 22px;
           padding: 16px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.06);
-          box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
         }
-
-        .quick-icon {
-          font-size: 20px;
-        }
-
-        .trust-panel {
-          margin-top: 18px;
-          border-radius: 24px;
-          padding: 18px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.06);
-          box-shadow: 0 14px 28px rgba(0,0,0,0.16);
-        }
-
-        .trust-head {
-          font-size: 16px;
-          font-weight: 900;
-          margin-bottom: 10px;
-        }
-
-        .trust-panel ul {
-          margin: 0;
-          padding-left: 18px;
-          color: rgba(255,255,255,0.72);
-          font-size: 13px;
-          line-height: 1.65;
-        }
-
         .bottom-nav {
           position: fixed;
           left: 0;
@@ -1195,65 +965,72 @@ export default function Home() {
           z-index: 40;
           width: min(calc(100% - 20px), 500px);
           margin: 0 auto;
+          padding: 8px;
+          border-radius: 22px;
+          background: rgba(8, 11, 20, 0.92);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          backdrop-filter: blur(18px);
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
           display: grid;
           grid-template-columns: repeat(5, 1fr);
           gap: 6px;
-          padding: 8px;
-          border-radius: 22px;
-          background: rgba(9, 13, 21, 0.9);
-          border: 1px solid rgba(255,255,255,0.06);
-          backdrop-filter: blur(18px);
-          box-shadow: 0 18px 44px rgba(0,0,0,0.28);
         }
-
-        .nav-item {
+        .nav-button {
           min-height: 42px;
           border-radius: 14px;
           background: transparent;
-          color: rgba(255,255,255,0.64);
+          color: rgba(255, 255, 255, 0.66);
           font-size: 12px;
           font-weight: 800;
         }
-
-        .nav-item.active {
-          background: rgba(255,117,31,0.1);
-          color: #ff8f49;
+        .nav-button.active {
+          background: rgba(255, 117, 31, 0.1);
+          color: #ff934f;
         }
-
-        .sticky-launchbar {
+        .dock-cta {
           position: fixed;
           left: 0;
           right: 0;
           bottom: 0;
           z-index: 41;
           padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-          background: linear-gradient(180deg, rgba(7,11,19,0), rgba(7,11,19,0.94) 24%, rgba(7,11,19,1) 100%);
+          background: linear-gradient(180deg, rgba(5, 8, 18, 0), rgba(5, 8, 18, 0.94) 24%, rgba(5, 8, 18, 1) 100%);
         }
-
-        .sticky-primary {
+        .dock-button {
           width: min(100%, 500px);
           display: block;
           margin: 0 auto;
         }
-
-        @media (max-width: 420px) {
-          .hero-title {
-            max-width: 12ch;
+        @media (max-width: 430px) {
+          .topbar {
+            align-items: flex-start;
+            flex-direction: column;
           }
-
-          .hero-metrics,
-          .mini-strip {
-            grid-template-columns: 1fr;
+          .topbar-right {
+            width: 100%;
           }
-
+          .top-action {
+            flex: 1 1 0;
+          }
+          .hero-strip,
+          .featured-grid,
+          .quick-grid {
+            grid-template-columns: 1fr 1fr;
+          }
           .install-card,
-          .promo-banner {
+          .banner-card {
             flex-direction: column;
             align-items: stretch;
           }
-
-          .install-actions {
-            align-items: stretch;
+          .install-buttons {
+            justify-content: flex-end;
+          }
+        }
+        @media (max-width: 380px) {
+          .hero-strip,
+          .featured-grid,
+          .quick-grid {
+            grid-template-columns: 1fr;
           }
         }
       `}</style>

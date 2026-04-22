@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Toshi.bet App Shell",
-  description: "Installable Toshi.bet mobile shell for casino, sportsbook, rewards, VIP, and affiliate traffic.",
+  title: "Toshi.bet",
+  description: "Toshi.bet mobile app.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
