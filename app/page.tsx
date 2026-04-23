@@ -1,4 +1,3 @@
-\
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -53,7 +52,6 @@ const ASSETS = {
   mascot: "/assets/toshi-mascot.png",
   casinoBanner: "/assets/casino.png",
   sportsBanner: "/assets/sports.png",
-  vipBanner: "/assets/toshi-mascot.png",
 };
 
 const TRACKING_KEYS = [
@@ -73,7 +71,7 @@ const TRACKING_KEYS = [
 const STORAGE_KEYS = {
   tracking: "toshi_pwa_tracking",
   recent: "toshi_pwa_recent_destination",
-  installDismissed: "toshi_pwa_install_dismissed_v3",
+  installDismissed: "toshi_pwa_install_dismissed_v4",
 };
 
 const ROUTES: RouteItem[] = [
@@ -92,7 +90,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     id: "casino",
     eyebrow: "Play now",
     title: "Casino",
-    copy: "Open straight into slots, live casino, and originals.",
+    copy: "Slots, live casino, and originals in one fast mobile flow.",
     cta: "Enter Casino",
     routeId: "casino",
     image: ASSETS.casinoBanner,
@@ -101,7 +99,7 @@ const PROMO_SLIDES: PromoSlide[] = [
     id: "sports",
     eyebrow: "Live betting",
     title: "Sports",
-    copy: "Fast entry into fixtures, markets, and live action.",
+    copy: "Go straight into fixtures, markets, and live action.",
     cta: "Bet Now",
     routeId: "sports",
     image: ASSETS.sportsBanner,
@@ -110,18 +108,18 @@ const PROMO_SLIDES: PromoSlide[] = [
     id: "vip",
     eyebrow: "Rewards",
     title: "VIP & Bonuses",
-    copy: "Keep return visits high with faster access to rewards and perks.",
+    copy: "Faster access to rewards, perks, and return-visit incentives.",
     cta: "View VIP",
     routeId: "vip",
-    image: ASSETS.vipBanner,
+    image: ASSETS.mascot,
   },
 ];
 
 const POPULAR_ITEMS: MediaItem[] = [
   { title: "Casino", sub: "Most played", routeId: "casino", image: ASSETS.casinoBanner },
   { title: "Sports", sub: "Live now", routeId: "sports", image: ASSETS.sportsBanner },
-  { title: "VIP", sub: "Rewards", routeId: "vip", image: ASSETS.vipBanner },
-  { title: "Rewards", sub: "Bonus flow", routeId: "rewards", image: ASSETS.casinoBanner },
+  { title: "VIP", sub: "Player perks", routeId: "vip", image: ASSETS.mascot },
+  { title: "Rewards", sub: "Bonus access", routeId: "rewards", image: ASSETS.casinoBanner },
   { title: "LMS", sub: "Free entry", routeId: "lms", image: ASSETS.sportsBanner },
 ];
 
@@ -166,7 +164,7 @@ function mergeTracking(current: TrackingParams, incoming: TrackingParams): Track
   return {
     ...current,
     ...Object.fromEntries(
-      Object.entries(incoming).filter(([, value]) => typeof value === "string" && value.length > 0)
+      Object.entries(incoming).filter(([, value]) => typeof value === "string" && value.length > 0),
     ),
   };
 }
@@ -201,7 +199,13 @@ function getRoute(id: string) {
 function HomeIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path
+        d="M4 11.5 12 5l8 6.5V20a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -210,8 +214,20 @@ function SlotsIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <rect x="5" y="3" width="12" height="18" rx="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M10 7h4M8.5 11h1M12 11h1M15.5 11h1M8.5 14.5h8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M17 8.5h1.8a1.2 1.2 0 0 1 0 2.4H17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M10 7h4M8.5 11h1M12 11h1M15.5 11h1M8.5 14.5h8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M17 8.5h1.8a1.2 1.2 0 0 1 0 2.4H17"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -220,7 +236,13 @@ function SportsIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12 3.5 8.4 7l1.2 4.2h4.8L15.6 7 12 3.5ZM9.6 11.2 6 13.8l1.4 4.4h4.6M14.4 11.2 18 13.8l-1.4 4.4H12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path
+        d="M12 3.5 8.4 7l1.2 4.2h4.8L15.6 7 12 3.5ZM9.6 11.2 6 13.8l1.4 4.4h4.6M14.4 11.2 18 13.8l-1.4 4.4H12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -229,7 +251,14 @@ function GiftIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <rect x="4" y="10" width="16" height="10" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12 10v10M4 13h16M7.5 10a2.5 2.5 0 1 1 0-5c2 0 4.5 3.3 4.5 5M16.5 10a2.5 2.5 0 1 0 0-5c-2 0-4.5 3.3-4.5 5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M12 10v10M4 13h16M7.5 10a2.5 2.5 0 1 1 0-5c2 0 4.5 3.3 4.5 5M16.5 10a2.5 2.5 0 1 0 0-5c-2 0-4.5 3.3-4.5 5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -237,7 +266,13 @@ function GiftIcon() {
 function CrownIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="m4 18 1.5-9 4.5 4 2-5 2 5 4.5-4L20 18Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path
+        d="m4 18 1.5-9 4.5 4 2-5 2 5 4.5-4L20 18Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
       <path d="M4 18h16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
@@ -246,8 +281,21 @@ function CrownIcon() {
 function TrophyIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M8 4h8v3a4 4 0 0 1-4 4 4 4 0 0 1-4-4V4Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M8 5H5.5A1.5 1.5 0 0 0 4 6.5V7a4 4 0 0 0 4 4M16 5h2.5A1.5 1.5 0 0 1 20 6.5V7a4 4 0 0 1-4 4M12 11v4M9 20h6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M8 4h8v3a4 4 0 0 1-4 4 4 4 0 0 1-4-4V4Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 5H5.5A1.5 1.5 0 0 0 4 6.5V7a4 4 0 0 0 4 4M16 5h2.5A1.5 1.5 0 0 1 20 6.5V7a4 4 0 0 1-4 4M12 11v4M9 20h6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -255,8 +303,20 @@ function TrophyIcon() {
 function DiamondIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M7 5h10l4 5-9 9-9-9 4-5Z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
-      <path d="M9.5 5 12 10l2.5-5M3 10h18" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path
+        d="M7 5h10l4 5-9 9-9-9 4-5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.5 5 12 10l2.5-5M3 10h18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -264,7 +324,12 @@ function DiamondIcon() {
 function WalletIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
       <path d="M4 8h12.5A2.5 2.5 0 0 0 19 5.5V5M15.5 13h.01" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
@@ -273,7 +338,14 @@ function WalletIcon() {
 function SupportIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M6 13v-1a6 6 0 0 1 12 0v1M6 13a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1v-5H6ZM18 13h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1v-5ZM9 19a3 3 0 0 0 3 2h1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6 13v-1a6 6 0 0 1 12 0v1M6 13a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1v-5H6ZM18 13h1a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-1v-5ZM9 19a3 3 0 0 0 3 2h1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -361,7 +433,7 @@ export default function Home() {
     setShowIOSInstall(isIOS() && !isStandalone());
     setRecentId(readRecentDestination());
     setInstallDismissed(
-      typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEYS.installDismissed) === "1"
+      typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEYS.installDismissed) === "1",
     );
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -383,7 +455,8 @@ export default function Home() {
   useEffect(() => {
     const timer = window.setInterval(() => {
       setActivePromo((prev) => (prev + 1) % PROMO_SLIDES.length);
-    }, 4200);
+    }, 4500);
+
     return () => window.clearInterval(timer);
   }, []);
 
@@ -428,7 +501,14 @@ export default function Home() {
             margin: 0;
             padding: 0;
             background: #060a12;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family:
+              Inter,
+              ui-sans-serif,
+              system-ui,
+              -apple-system,
+              BlinkMacSystemFont,
+              "Segoe UI",
+              sans-serif;
           }
 
           * {
@@ -470,7 +550,7 @@ export default function Home() {
             align-items: center;
             justify-content: center;
             background:
-              radial-gradient(circle at 50% 18%, rgba(255,117,31,0.3) 0%, rgba(255,117,31,0.06) 24%, rgba(6,10,18,1) 58%),
+              radial-gradient(circle at 50% 18%, rgba(255, 117, 31, 0.3) 0%, rgba(255, 117, 31, 0.06) 24%, rgba(6, 10, 18, 1) 58%),
               linear-gradient(180deg, #060a12 0%, #09111b 100%);
             padding: 24px;
           }
@@ -482,8 +562,8 @@ export default function Home() {
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(180deg, rgba(255,117,31,0.18), rgba(255,117,31,0.04));
-            border: 1px solid rgba(255,117,31,0.32);
+            background: linear-gradient(180deg, rgba(255, 117, 31, 0.18), rgba(255, 117, 31, 0.04));
+            border: 1px solid rgba(255, 117, 31, 0.32);
             animation: splashPulse 1.8s ease-in-out infinite;
           }
 
@@ -506,7 +586,7 @@ export default function Home() {
             height: 5px;
             border-radius: 999px;
             overflow: hidden;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
           }
 
           .splash-track span {
@@ -514,7 +594,7 @@ export default function Home() {
             width: 42%;
             height: 100%;
             border-radius: 999px;
-            background: linear-gradient(90deg, rgba(255,117,31,0), #ff751f, rgba(255,117,31,0));
+            background: linear-gradient(90deg, rgba(255, 117, 31, 0), #ff751f, rgba(255, 117, 31, 0));
             animation: loadBar 1.05s linear infinite;
           }
         `}</style>
@@ -551,21 +631,34 @@ export default function Home() {
         </header>
 
         <section className="auth-strip">
-          <button className="login-button" onClick={() => handleRoute(getRoute("casino"))}>Play</button>
-          <button className="register-button" onClick={() => handleRoute(getRoute("deposit"))}>Deposit</button>
+          <button className="login-button" onClick={() => handleRoute(getRoute("casino"))}>
+            Play
+          </button>
+          <button className="register-button" onClick={() => handleRoute(getRoute("deposit"))}>
+            Deposit
+          </button>
         </section>
 
         {!installed && !installDismissed && (deferredPrompt || showIOSInstall) && (
           <section className="install-bar">
             <div className="install-copy">
               <strong>Install app</strong>
-              <span>{showIOSInstall && !deferredPrompt ? "Share → Add to Home Screen" : "Launch from home screen for the best experience"}</span>
+              <span>
+                {showIOSInstall && !deferredPrompt
+                  ? "Share → Add to Home Screen"
+                  : "Launch from home screen for the best experience"}
+              </span>
             </div>
+
             <div className="install-actions">
               {deferredPrompt && (
-                <button className="mini-primary" onClick={handleInstall}>Install</button>
+                <button className="mini-primary" onClick={handleInstall}>
+                  Install
+                </button>
               )}
-              <button className="mini-ghost" onClick={dismissInstallCard}>Later</button>
+              <button className="mini-ghost" onClick={dismissInstallCard}>
+                Later
+              </button>
             </div>
           </section>
         )}
@@ -585,7 +678,7 @@ export default function Home() {
         <section
           className="promo-panel"
           style={{
-            backgroundImage: `linear-gradient(90deg, rgba(6,10,18,0.88) 0%, rgba(6,10,18,0.62) 46%, rgba(6,10,18,0.20) 100%), url(${activeSlide.image})`,
+            backgroundImage: `linear-gradient(90deg, rgba(6,10,18,0.92) 0%, rgba(6,10,18,0.70) 42%, rgba(6,10,18,0.25) 100%), url(${activeSlide.image})`,
           }}
         >
           <div className="promo-overlay" />
@@ -629,7 +722,9 @@ export default function Home() {
 
         <section className="row-head">
           <h2>Popular now</h2>
-          <button className="row-link" onClick={() => handleRoute(getRoute("casino"))}>Open casino</button>
+          <button className="row-link" onClick={() => handleRoute(getRoute("casino"))}>
+            Open casino
+          </button>
         </section>
 
         <section className="horizontal-row">
@@ -653,7 +748,9 @@ export default function Home() {
 
         <section className="row-head compact">
           <h2>Live routes</h2>
-          <button className="row-link" onClick={() => handleRoute(getRoute("sports"))}>Open sports</button>
+          <button className="row-link" onClick={() => handleRoute(getRoute("sports"))}>
+            Open sports
+          </button>
         </section>
 
         <section className="live-list">
@@ -674,7 +771,9 @@ export default function Home() {
 
         <section className="row-head compact">
           <h2>Quick actions</h2>
-          <button className="row-link" onClick={() => handleRoute(getRoute("affiliate"))}>More</button>
+          <button className="row-link" onClick={() => handleRoute(getRoute("affiliate"))}>
+            More
+          </button>
         </section>
 
         <section className="quick-grid">
@@ -730,7 +829,14 @@ export default function Home() {
           margin: 0;
           padding: 0;
           background: #060a12;
-          font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          font-family:
+            Inter,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
         }
 
         * {
@@ -776,7 +882,7 @@ export default function Home() {
           position: relative;
           overflow-x: hidden;
           background:
-            radial-gradient(circle at top, rgba(255,117,31,0.16) 0%, rgba(255,117,31,0.06) 12%, rgba(6,10,18,1) 38%),
+            radial-gradient(circle at top, rgba(255, 117, 31, 0.16) 0%, rgba(255, 117, 31, 0.06) 12%, rgba(6, 10, 18, 1) 38%),
             linear-gradient(180deg, #060a12 0%, #09111b 100%);
           padding-bottom: 170px;
         }
@@ -794,7 +900,7 @@ export default function Home() {
           height: 220px;
           top: -40px;
           left: -80px;
-          background: rgba(255,117,31,0.18);
+          background: rgba(255, 117, 31, 0.18);
         }
 
         .bg-orb-b {
@@ -802,7 +908,7 @@ export default function Home() {
           height: 180px;
           top: 240px;
           right: -90px;
-          background: rgba(0,162,255,0.1);
+          background: rgba(0, 162, 255, 0.1);
         }
 
         .wrap {
@@ -823,7 +929,7 @@ export default function Home() {
           gap: 10px;
           padding: 10px 2px 14px;
           backdrop-filter: blur(18px);
-          background: linear-gradient(180deg, rgba(6,10,18,0.95), rgba(6,10,18,0.72));
+          background: linear-gradient(180deg, rgba(6, 10, 18, 0.95), rgba(6, 10, 18, 0.72));
         }
 
         .brand {
@@ -837,12 +943,12 @@ export default function Home() {
           width: 46px;
           height: 46px;
           border-radius: 16px;
-          background: linear-gradient(180deg, rgba(255,117,31,0.18), rgba(255,117,31,0.05));
-          border: 1px solid rgba(255,117,31,0.28);
+          background: linear-gradient(180deg, rgba(255, 117, 31, 0.18), rgba(255, 117, 31, 0.05));
+          border: 1px solid rgba(255, 117, 31, 0.28);
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 18px 28px rgba(0,0,0,0.2);
+          box-shadow: 0 18px 28px rgba(0, 0, 0, 0.2);
           flex-shrink: 0;
         }
 
@@ -859,14 +965,14 @@ export default function Home() {
         .brand-logo-wordmark {
           height: 22px;
           width: auto;
-          max-width: 170px;
+          max-width: 178px;
           object-fit: contain;
         }
 
         .brand-status {
           margin-top: 4px;
           font-size: 12px;
-          color: rgba(255,255,255,0.56);
+          color: rgba(255, 255, 255, 0.56);
         }
 
         .topbar-actions {
@@ -879,9 +985,9 @@ export default function Home() {
           height: 38px;
           padding: 9px;
           border-radius: 12px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.06);
-          color: rgba(255,255,255,0.82);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.82);
         }
 
         .auth-strip {
@@ -893,7 +999,7 @@ export default function Home() {
 
         .login-button,
         .register-button {
-          min-height: 46px;
+          min-height: 48px;
           border-radius: 14px;
           font-weight: 900;
         }
@@ -901,11 +1007,13 @@ export default function Home() {
         .login-button {
           background: linear-gradient(180deg, #1b7cff 0%, #0457d8 100%);
           color: #fff;
+          box-shadow: 0 14px 28px rgba(27, 124, 255, 0.24);
         }
 
         .register-button {
           background: linear-gradient(180deg, #2fe977 0%, #0fb856 100%);
           color: #05120a;
+          box-shadow: 0 14px 28px rgba(28, 201, 102, 0.2);
         }
 
         .install-bar {
@@ -916,8 +1024,8 @@ export default function Home() {
           gap: 12px;
           padding: 12px 14px;
           border-radius: 18px;
-          background: rgba(255,255,255,0.045);
-          border: 1px solid rgba(255,255,255,0.06);
+          background: rgba(255, 255, 255, 0.045);
+          border: 1px solid rgba(255, 255, 255, 0.06);
         }
 
         .install-copy {
@@ -934,7 +1042,7 @@ export default function Home() {
         .install-copy span {
           font-size: 12px;
           line-height: 1.35;
-          color: rgba(255,255,255,0.62);
+          color: rgba(255, 255, 255, 0.62);
         }
 
         .install-actions {
@@ -958,8 +1066,8 @@ export default function Home() {
         }
 
         .mini-ghost {
-          background: rgba(255,255,255,0.06);
-          color: rgba(255,255,255,0.82);
+          background: rgba(255, 255, 255, 0.06);
+          color: rgba(255, 255, 255, 0.82);
         }
 
         .home-tabs {
@@ -981,48 +1089,48 @@ export default function Home() {
           min-height: 36px;
           padding: 0 14px;
           border-radius: 999px;
-          background: rgba(255,255,255,0.04);
-          color: rgba(255,255,255,0.68);
-          border: 1px solid rgba(255,255,255,0.05);
+          background: rgba(255, 255, 255, 0.04);
+          color: rgba(255, 255, 255, 0.68);
+          border: 1px solid rgba(255, 255, 255, 0.05);
           font-size: 12px;
           font-weight: 800;
         }
 
         .home-tab.active {
-          background: rgba(255,117,31,0.12);
+          background: rgba(255, 117, 31, 0.12);
           color: #ff9b5e;
-          border-color: rgba(255,117,31,0.16);
+          border-color: rgba(255, 117, 31, 0.16);
         }
 
         .promo-panel {
           position: relative;
           margin-top: 14px;
-          border-radius: 28px;
+          border-radius: 30px;
           overflow: hidden;
-          border: 1px solid rgba(255,255,255,0.07);
-          min-height: 260px;
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          min-height: 300px;
           background-size: cover;
           background-position: center;
-          box-shadow: 0 28px 60px rgba(0,0,0,0.34);
+          box-shadow: 0 28px 60px rgba(0, 0, 0, 0.34);
         }
 
         .promo-overlay {
           position: absolute;
           inset: 0;
           background:
-            radial-gradient(circle at 20% 24%, rgba(255,117,31,0.22), transparent 30%),
-            radial-gradient(circle at 78% 78%, rgba(0,143,255,0.14), transparent 34%);
+            radial-gradient(circle at 20% 24%, rgba(255, 117, 31, 0.22), transparent 30%),
+            radial-gradient(circle at 78% 78%, rgba(0, 143, 255, 0.14), transparent 34%);
           pointer-events: none;
         }
 
         .promo-content {
           position: relative;
           z-index: 1;
-          padding: 22px 20px;
+          padding: 24px 20px;
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
-          min-height: 260px;
+          min-height: 300px;
         }
 
         .promo-eyebrow {
@@ -1035,8 +1143,8 @@ export default function Home() {
 
         .promo-title {
           margin: 10px 0 8px;
-          font-size: clamp(30px, 7vw, 38px);
-          line-height: 0.98;
+          font-size: clamp(32px, 7vw, 42px);
+          line-height: 0.96;
           font-weight: 950;
           letter-spacing: -0.05em;
           max-width: 10ch;
@@ -1044,11 +1152,11 @@ export default function Home() {
 
         .promo-copy {
           margin: 0;
-          max-width: 28ch;
-          color: rgba(255,255,255,0.78);
+          max-width: 29ch;
+          color: rgba(255, 255, 255, 0.8);
           font-size: 14px;
           line-height: 1.55;
-          text-shadow: 0 2px 16px rgba(0,0,0,0.32);
+          text-shadow: 0 2px 16px rgba(0, 0, 0, 0.32);
         }
 
         .promo-actions {
@@ -1076,9 +1184,9 @@ export default function Home() {
           min-height: 46px;
           padding: 0 16px;
           border-radius: 16px;
-          background: rgba(255,255,255,0.08);
+          background: rgba(255, 255, 255, 0.08);
           color: #fff;
-          border: 1px solid rgba(255,255,255,0.08);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           font-weight: 800;
           backdrop-filter: blur(8px);
         }
@@ -1094,7 +1202,7 @@ export default function Home() {
           height: 8px;
           border-radius: 999px;
           padding: 0;
-          background: rgba(255,255,255,0.24);
+          background: rgba(255, 255, 255, 0.24);
         }
 
         .dot.active {
@@ -1114,10 +1222,10 @@ export default function Home() {
           min-height: 132px;
           border-radius: 22px;
           padding: 14px 10px;
-          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-          border: 1px solid rgba(255,255,255,0.07);
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+          border: 1px solid rgba(255, 255, 255, 0.07);
           text-align: left;
-          box-shadow: 0 16px 32px rgba(0,0,0,0.2);
+          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
         }
 
         .feature-icon,
@@ -1126,9 +1234,9 @@ export default function Home() {
           height: 38px;
           padding: 8px;
           border-radius: 12px;
-          background: rgba(255,117,31,0.12);
+          background: rgba(255, 117, 31, 0.12);
           color: #ff9b5e;
-          border: 1px solid rgba(255,117,31,0.16);
+          border: 1px solid rgba(255, 117, 31, 0.16);
         }
 
         .feature-title {
@@ -1143,7 +1251,7 @@ export default function Home() {
           margin-top: 6px;
           font-size: 11px;
           line-height: 1.35;
-          color: rgba(255,255,255,0.56);
+          color: rgba(255, 255, 255, 0.56);
         }
 
         .feature-badge {
@@ -1155,7 +1263,7 @@ export default function Home() {
           border-radius: 999px;
           display: inline-flex;
           align-items: center;
-          background: rgba(255,255,255,0.07);
+          background: rgba(255, 255, 255, 0.07);
           color: #ffbb92;
           font-size: 10px;
           font-weight: 800;
@@ -1196,17 +1304,17 @@ export default function Home() {
         }
 
         .media-card {
-          flex: 0 0 148px;
+          flex: 0 0 152px;
           border-radius: 22px;
           padding: 12px;
           text-align: left;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.06);
-          box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
         }
 
         .media-art {
-          height: 112px;
+          height: 118px;
           border-radius: 16px;
           margin-bottom: 12px;
           background-size: cover;
@@ -1224,7 +1332,7 @@ export default function Home() {
           display: block;
           margin-top: 6px;
           font-size: 12px;
-          color: rgba(255,255,255,0.58);
+          color: rgba(255, 255, 255, 0.58);
         }
 
         .live-list {
@@ -1237,8 +1345,8 @@ export default function Home() {
           min-height: 62px;
           padding: 0 16px;
           border-radius: 18px;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.06);
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -1266,7 +1374,7 @@ export default function Home() {
           border-radius: 999px;
           display: inline-flex;
           align-items: center;
-          background: rgba(255,117,31,0.1);
+          background: rgba(255, 117, 31, 0.1);
           color: #ff9b5e;
           font-size: 11px;
           font-weight: 800;
@@ -1274,7 +1382,7 @@ export default function Home() {
         }
 
         .live-right {
-          color: rgba(255,255,255,0.62);
+          color: rgba(255, 255, 255, 0.62);
           font-size: 13px;
           font-weight: 700;
           flex-shrink: 0;
@@ -1292,9 +1400,9 @@ export default function Home() {
           padding: 16px;
           border-radius: 22px;
           text-align: left;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.06);
-          box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
         }
 
         .quick-card strong {
@@ -1310,7 +1418,7 @@ export default function Home() {
           margin-top: 6px;
           font-size: 12px;
           line-height: 1.4;
-          color: rgba(255,255,255,0.58);
+          color: rgba(255, 255, 255, 0.58);
         }
 
         .bottom-nav {
@@ -1326,10 +1434,10 @@ export default function Home() {
           gap: 6px;
           padding: 8px;
           border-radius: 22px;
-          background: rgba(8,12,20,0.92);
-          border: 1px solid rgba(255,255,255,0.06);
+          background: rgba(8, 12, 20, 0.92);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           backdrop-filter: blur(18px);
-          box-shadow: 0 18px 42px rgba(0,0,0,0.28);
+          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
         }
 
         .nav-item {
@@ -1341,11 +1449,11 @@ export default function Home() {
           align-items: center;
           justify-content: center;
           gap: 5px;
-          color: rgba(255,255,255,0.6);
+          color: rgba(255, 255, 255, 0.6);
         }
 
         .nav-item.active {
-          background: rgba(255,117,31,0.1);
+          background: rgba(255, 117, 31, 0.1);
           color: #ff9b5e;
         }
 
@@ -1366,7 +1474,7 @@ export default function Home() {
           bottom: 0;
           z-index: 41;
           padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
-          background: linear-gradient(180deg, rgba(6,10,18,0), rgba(6,10,18,0.94) 24%, rgba(6,10,18,1) 100%);
+          background: linear-gradient(180deg, rgba(6, 10, 18, 0), rgba(6, 10, 18, 0.94) 24%, rgba(6, 10, 18, 1) 100%);
         }
 
         .sticky-main {
@@ -1382,8 +1490,13 @@ export default function Home() {
           }
 
           .brand-logo-wordmark {
-            max-width: 140px;
+            max-width: 146px;
             height: 20px;
+          }
+
+          .promo-panel,
+          .promo-content {
+            min-height: 280px;
           }
         }
 

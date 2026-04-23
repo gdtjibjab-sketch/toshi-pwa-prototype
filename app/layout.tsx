@@ -1,4 +1,3 @@
-\
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
@@ -6,12 +5,12 @@ export const metadata: Metadata = {
   title: "Toshi.bet",
   description: "Toshi.bet mobile app shell",
   manifest: "/manifest.webmanifest",
+  applicationName: "Toshi.bet",
   appleWebApp: {
     capable: true,
     title: "Toshi.bet",
     statusBarStyle: "black-translucent",
   },
-  applicationName: "Toshi.bet",
   formatDetection: {
     telephone: false,
   },
